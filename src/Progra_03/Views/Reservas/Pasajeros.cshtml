@@ -1,0 +1,205 @@
+﻿@model List<Progra_03.Models.Pasajero>
+
+@{
+    ViewBag.Title = "Datos de los pasajeros";
+    var vuelos = (List<Progra_03.Models.Vuelo>)ViewBag.Vuelos;
+    var codigos = (List<string>)ViewBag.Codigos;
+    var tipos = (List<Progra_03.Models.TipoDocumentoIdentidad>)ViewBag.TipoDocumentoCodigo;
+    var seleccion = (Progra_03.Models.SeleccionReserva)ViewBag.Seleccion;
+    int? vueloId = null;
+    if (seleccion.ItinerarioId == null)
+    {
+        vueloId = seleccion.VueloIds[0];
+    }
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Datos de los pasajeros</h1>
+        <p>Pantalla 9 · Complete los datos tal como constan en el documento de identidad.</p>
+        @Html.Partial("_Pasos", 3)
+    </div>
+</div>
+
+<div class="container">
+    @using (Html.BeginForm("Pasajeros", "Reservas", FormMethod.Post, new { id = "formPasajeros" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row g-4">
+            <div class="col-lg-8">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    <div class="tarjeta mb-3 bloque-pasajero">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h2 class="mb-0">Pasajero @(i + 1)</h2>
+                            <span class="estado e-verde">Asiento @codigos[i]</span>
+                        </div>
+                        <div class="row g-3">
+                            @try
+                            {
+                                <div class="col-md-5">
+                                    @Html.LabelFor(m => m[i].TipoDocumentoCodigo, htmlAttributes: new { @class = "form-label" })
+                                    @Html.DropDownListFor(m => m[i].TipoDocumentoCodigo, new SelectList(tipos, "Codigo", "Descripcion", Model[i].TipoDocumentoCodigo), new { @class = "form-select tipo-documento" })
+                                    @Html.ValidationMessageFor(m => m[i].TipoDocumentoCodigo, "Seleccione el tipo de documento", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en TipoDocumentoCodigo: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-7">
+                                    @Html.LabelFor(m => m[i].NumeroDocumento, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(m => m[i].NumeroDocumento, new { htmlAttributes = new { @class = "form-control numero-documento" } })
+                                    @Html.ValidationMessageFor(m => m[i].NumeroDocumento, "Ingrese un número de documento válido", new { @class = "text-info" })
+                                    <div class="text-danger small mensaje-documento"></div>
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en NumeroDocumento: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-6">
+                                    @Html.LabelFor(m => m[i].Nombres, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(m => m[i].Nombres, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(m => m[i].Nombres, "Ingrese nombres válidos (solo letras)", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en Nombres: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-6">
+                                    @Html.LabelFor(m => m[i].Apellidos, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(m => m[i].Apellidos, new { htmlAttributes = new { @class = "form-control" } })
+                                    @Html.ValidationMessageFor(m => m[i].Apellidos, "Ingrese apellidos válidos (solo letras)", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en Apellidos: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-4">
+                                    @Html.LabelFor(m => m[i].FechaNacimiento, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(m => m[i].FechaNacimiento, new { htmlAttributes = new { @class = "form-control", max = DateTime.Today.ToString("yyyy-MM-dd") } })
+                                    @Html.ValidationMessageFor(m => m[i].FechaNacimiento, "Ingrese una fecha de nacimiento válida", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en FechaNacimiento: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-4">
+                                    @Html.LabelFor(m => m[i].Correo, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(m => m[i].Correo, new { htmlAttributes = new { @class = "form-control", placeholder = "nombre@correo.com" } })
+                                    @Html.ValidationMessageFor(m => m[i].Correo, "Ingrese un correo válido", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en Correo: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-4">
+                                    @Html.LabelFor(m => m[i].Telefono, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(m => m[i].Telefono, new { htmlAttributes = new { @class = "form-control", placeholder = "0991234567" } })
+                                    @Html.ValidationMessageFor(m => m[i].Telefono, "Ingrese un teléfono válido", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en Telefono: @ex.Message</div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="col-lg-4">
+                <div class="resumen">
+                    <div class="dorado">SU VIAJE</div>
+                    @foreach (var vuelo in vuelos)
+                    {
+                        <div class="mt-2">
+                            <b>@vuelo.Frecuencia.Ruta.DescripcionCompleta</b>
+                            <div class="small text-white-50">@vuelo.CodigoVuelo · @vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    }
+                    <div class="small mt-3">Asientos: <b>@string.Join(", ", codigos)</b></div>
+                    <hr />
+                    <div class="d-flex justify-content-between"><span>Total</span><b class="fs-5">USD @(((decimal)ViewBag.Total).ToString("N2"))</b></div>
+                </div>
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn btn-oro py-2">Guardar y continuar</button>
+                    @if (seleccion.CantidadPasajeros < Progra_03.Models.Vuelo.CapacidadMaxima)
+                    {
+                        <a class="btn btn-outline-secondary" href="@Url.Action("SeleccionAsiento", new { id = vueloId, itinerarioId = seleccion.ItinerarioId, pasajeros = seleccion.CantidadPasajeros + 1 })">Añadir pasajero</a>
+                    }
+                    <a class="btn btn-link btn-sm" href="@Url.Action("SeleccionAsiento", new { id = vueloId, itinerarioId = seleccion.ItinerarioId, pasajeros = seleccion.CantidadPasajeros })">Regresar a asientos</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    @Html.Partial("_ScriptsValidacion")
+    @Html.Partial("_ValidarCedula")
+    <script>
+        function validarDocumento(bloque) {
+            var tipo = bloque.find(".tipo-documento").val();
+            var valor = bloque.find(".numero-documento").val().trim().toUpperCase();
+            var mensaje = "";
+
+            if (valor === "") {
+                mensaje = "";
+            } else if (tipo === "CEDULA" && !validarCedulaJS(valor)) {
+                mensaje = "La cédula ingresada no es válida.";
+            } else if (tipo === "PASAPORTE" && !/^[A-Z0-9]{5,20}$/.test(valor)) {
+                mensaje = "El pasaporte debe tener entre 5 y 20 letras o números.";
+            }
+
+            mostrarMensaje(bloque.find(".mensaje-documento"), bloque.find(".numero-documento"), mensaje);
+            return mensaje === "";
+        }
+
+        $(".numero-documento").on("input", function () {
+            var tipo = $(this).closest(".bloque-pasajero").find(".tipo-documento").val();
+            if (tipo === "CEDULA") {
+                this.value = this.value.replace(/\D/g, "").slice(0, 10);
+            } else {
+                this.value = this.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 20);
+            }
+        });
+
+        $(".tipo-documento").on("change", function () {
+            validarDocumento($(this).closest(".bloque-pasajero"));
+        });
+
+        $(".numero-documento").on("blur", function () {
+            validarDocumento($(this).closest(".bloque-pasajero"));
+        });
+
+        $("#formPasajeros").on("submit", function (evento) {
+            var correcto = true;
+            $(".bloque-pasajero").each(function () {
+                if (!validarDocumento($(this))) {
+                    correcto = false;
+                }
+            });
+            if (!correcto) {
+                evento.preventDefault();
+            }
+        });
+    </script>
+}

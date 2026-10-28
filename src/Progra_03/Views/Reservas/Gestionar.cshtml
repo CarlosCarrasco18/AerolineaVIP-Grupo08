@@ -1,0 +1,55 @@
+﻿@model Progra_03.Models.Reserva
+
+@{
+    ViewBag.Title = "Gestionar reserva";
+    bool vigente = Model.EstadoReservaCodigo == "PENDIENTE" || Model.EstadoReservaCodigo == "CONFIRMADA";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Reserva @Model.CodigoReserva</h1>
+        <p>Pantalla 14 · Detalle de la reserva y cancelación.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                <h2>Detalle</h2>
+                @Html.Partial("_DetalleReserva", Model)
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="tarjeta">
+                <h2>Acciones</h2>
+                @if (Model.EstadoReservaCodigo == "PENDIENTE")
+                {
+                    <a class="btn btn-oro w-100 mb-2" href="@Url.Action("Pagar", "Compras", new { id = Model.ReservaId })">Pagar ahora</a>
+                }
+                @if (Model.EstadoReservaCodigo == "CONFIRMADA")
+                {
+                    <a class="btn btn-azul w-100 mb-2" href="@Url.Action("CheckIn", new { id = Model.ReservaId })">Check-in</a>
+                    <a class="btn btn-outline-dark w-100 mb-2" href="@Url.Action("Index", "Comprobantes", new { numero = Model.CodigoReserva })">Ver comprobante</a>
+                }
+                @if (vigente)
+                {
+                    using (Html.BeginForm("Cancelar", "Reservas", new { id = Model.ReservaId }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <hr />
+                        <p class="small text-muted">Si cancela, los asientos vuelven a estar disponibles. Esta acción no se puede deshacer.</p>
+                        <div class="form-check small mb-3">
+                            <input class="form-check-input" type="checkbox" name="confirmacion" value="true" id="confirmacion" />
+                            <label class="form-check-label" for="confirmacion">Confirmo que deseo cancelar la reserva.</label>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Cancelar reserva</button>
+                    }
+                }
+                <a class="btn btn-outline-secondary w-100 mt-2" href="@Url.Action("MisReservas")">Volver</a>
+            </div>
+        </div>
+    </div>
+</div>

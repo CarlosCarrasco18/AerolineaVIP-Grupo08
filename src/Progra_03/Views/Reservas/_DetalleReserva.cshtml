@@ -1,0 +1,36 @@
+﻿@model Progra_03.Models.Reserva
+
+<div class="row g-2 mb-3">
+    <div class="col-6 col-md-3"><div class="dato"><small>Estado</small><div><span class="estado e-@Model.EstadoReservaCodigo">@Model.EstadoReservaCodigo</span></div></div></div>
+    <div class="col-6 col-md-3"><div class="dato"><small>Creada</small><div style="font-size:1rem">@Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</div></div></div>
+    <div class="col-6 col-md-3"><div class="dato"><small>Vence</small><div style="font-size:1rem">@(Model.FechaExpiracion != null ? Model.FechaExpiracion.Value.ToString("dd/MM/yyyy HH:mm") : "-")</div></div></div>
+    <div class="col-6 col-md-3"><div class="dato"><small>Total</small><div style="font-size:1rem">USD @Model.CalcularTotal().ToString("N2")</div></div></div>
+</div>
+
+<div class="tabla">
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th>Pasajero</th>
+                <th>Vuelo</th>
+                <th>Salida</th>
+                <th>Asiento</th>
+                <th>Importe</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var asignacion in Model.ReservaPasajeroVueloes.OrderBy(a => a.Vuelo.FechaOperacion).ThenBy(a => a.Vuelo.Frecuencia.HoraSalida))
+            {
+                <tr>
+                    <td>@asignacion.Pasajero.NombreCompleto</td>
+                    <td>@asignacion.Vuelo.CodigoVuelo · @asignacion.Vuelo.Frecuencia.Ruta.Descripcion</td>
+                    <td>@asignacion.Vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@asignacion.CodigoAsiento</td>
+                    <td class="text-nowrap">USD @asignacion.ImporteTramo.ToString("N2")</td>
+                    <td><span class="estado e-@asignacion.EstadoAsignacionCodigo">@asignacion.EstadoAsignacionCodigo</span></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

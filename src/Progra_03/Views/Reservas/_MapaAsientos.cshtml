@@ -1,0 +1,72 @@
+﻿@model bool
+
+@{
+    var asientos = (List<Progra_03.Models.Asiento>)ViewBag.Asientos;
+    var ocupados = (List<byte>)ViewBag.Ocupados;
+    var reservados = (List<byte>)ViewBag.Reservados;
+    var elegidos = ViewBag.Elegidos as List<byte>;
+    if (elegidos == null)
+    {
+        elegidos = new List<byte>();
+    }
+    string[] lados = { "I", "D" };
+}
+
+@if (asientos.Count == 0)
+{
+    <div class="alert alert-warning small mb-0">El vuelo todavía no tiene una aeronave asignada.</div>
+}
+else
+{
+    <div class="cabina">
+        @foreach (string lado in lados)
+        {
+            <div class="row g-3 @(lado == "I" ? "mb-3" : "")">
+                @for (int fila = 1; fila <= 4; fila++)
+                {
+                    var asiento = asientos.FirstOrDefault(a => a.Fila == fila && a.Lado == lado);
+                    <div class="col-3">
+                        @if (asiento == null)
+                        {
+                            <div class="text-center small text-muted pt-3">Puerta</div>
+                        }
+                        else
+                        {
+                            string clase = "a-libre";
+                            string texto = "Disponible";
+                            if (ocupados.Contains(asiento.NumeroAsiento))
+                            {
+                                clase = "a-ocupado";
+                                texto = "Ocupado";
+                            }
+                            else if (reservados.Contains(asiento.NumeroAsiento))
+                            {
+                                clase = "a-reservado";
+                                texto = "Reservado";
+                            }
+
+                            if (Model && clase == "a-libre")
+                            {
+                                <input type="checkbox" class="btn-check asiento-check" name="asientos" value="@asiento.NumeroAsiento" id="asiento@(asiento.NumeroAsiento)" data-codigo="@asiento.Codigo" autocomplete="off" @(elegidos.Contains(asiento.NumeroAsiento) ? "checked" : "") />
+                                <label class="asiento @clase" for="asiento@(asiento.NumeroAsiento)" title="@asiento.Ubicacion">@asiento.Codigo</label>
+                            }
+                            else
+                            {
+                                <div class="asiento @clase" title="@texto · @asiento.Ubicacion">@asiento.Codigo</div>
+                            }
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    <div class="ley mt-3">
+        <span><i class="a-libre"></i>Disponible</span>
+        <span><i class="a-ocupado"></i>Ocupado</span>
+        <span><i class="a-reservado"></i>Reservado</span>
+        @if (Model)
+        {
+            <span><i style="outline:3px solid #c39a3f;background:#fff"></i>Su selección</span>
+        }
+    </div>
+}

@@ -1,0 +1,46 @@
+﻿@model Progra_03.Models.Reserva
+
+@{
+    ViewBag.Title = "Eliminar reserva";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Eliminar reserva.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Reservas")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            @Html.Partial("_Mensaje")
+
+            <div class="tarjeta">
+                <h2>¿Desea eliminar la reserva @Model.CodigoReserva?</h2>
+                <dl class="row mb-3">
+                    <dt class="col-sm-4 text-muted">Estado</dt>
+                    <dd class="col-sm-8"><span class="estado e-@Model.EstadoReservaCodigo">@Model.EstadoReservaCodigo</span></dd>
+                    <dt class="col-sm-4 text-muted">Creada</dt>
+                    <dd class="col-sm-8">@Model.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</dd>
+                    <dt class="col-sm-4 text-muted">Asientos</dt>
+                    <dd class="col-sm-8">@Model.ReservaPasajeroVueloes.Count</dd>
+                </dl>
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2">
+                        @if (ViewBag.Message == null)
+                        {
+                            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+                        }
+                        @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

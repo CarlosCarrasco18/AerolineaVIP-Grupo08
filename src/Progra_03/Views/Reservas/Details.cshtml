@@ -1,0 +1,74 @@
+﻿@model Progra_03.Models.Reserva
+
+@{
+    ViewBag.Title = "Detalle de reserva";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Detalle de la reserva @Model.CodigoReserva.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Reservas")
+
+    <div class="tarjeta mt-3">
+        <h2>Reserva @Model.CodigoReserva</h2>
+        @Html.Partial("_DetalleReserva", Model)
+    </div>
+
+    <div class="row g-3 mt-1">
+        <div class="col-lg-6">
+            <div class="tarjeta h-100">
+                <h2>Compras y pagos</h2>
+                <table class="table table-sm mb-0">
+                    <tr><th>Fecha</th><th>Importe</th><th>Estado</th><th>Pagos</th></tr>
+                    @foreach (var compra in Model.Compras)
+                    {
+                        <tr>
+                            <td>@compra.FechaCompra.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="text-nowrap">USD @compra.Importe.ToString("N2")</td>
+                            <td><span class="estado e-@compra.EstadoCompraCodigo">@compra.EstadoCompraCodigo</span></td>
+                            <td class="small">
+                                @foreach (var pago in compra.Pagoes)
+                                {
+                                    <div>@pago.MarcaTarjetaCodigo **** @pago.UltimosCuatroDigitos · @pago.EstadoPagoCodigo</div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="tarjeta h-100">
+                <h2>Check-in</h2>
+                <table class="table table-sm mb-0">
+                    <tr><th>Pasajero</th><th>Vuelo</th><th>Fecha</th><th>Estado</th></tr>
+                    @foreach (var asignacion in Model.ReservaPasajeroVueloes)
+                    {
+                        foreach (var checkIn in asignacion.CheckIns)
+                        {
+                            <tr>
+                                <td>@asignacion.Pasajero.NombreCompleto</td>
+                                <td>@asignacion.Vuelo.CodigoVuelo</td>
+                                <td>@checkIn.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td><span class="estado e-@checkIn.EstadoCheckInCodigo">@checkIn.EstadoCheckInCodigo</span></td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-3">
+        @if (Model.EstadoReservaCodigo == "CONFIRMADA")
+        {
+            @Html.ActionLink("Check-in", "CheckIn", new { id = Model.ReservaId }, new { @class = "btn btn-oro" })
+        }
+        @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+    </div>
+</div>

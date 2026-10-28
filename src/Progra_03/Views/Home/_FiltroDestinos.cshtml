@@ -1,0 +1,27 @@
+﻿@model List<Progra_03.Models.Ruta>
+
+<script>
+    var rutas = {};
+    @foreach (var ruta in Model)
+    {
+        @:rutas["@ruta.AeropuertoOrigenId-@ruta.AeropuertoDestinoId"] = true;
+    }
+
+    function filtrarDestinos() {
+        var origen = $("#origen").val();
+        $("#destino option").each(function () {
+            var valor = $(this).val();
+            if (valor === "") {
+                return;
+            }
+            var existe = origen !== "" && rutas[origen + "-" + valor] === true;
+            $(this).prop("disabled", !existe).prop("hidden", !existe);
+        });
+        if ($("#destino option:selected").prop("disabled")) {
+            $("#destino").val("");
+        }
+    }
+
+    $("#origen").on("change", filtrarDestinos);
+    filtrarDestinos();
+</script>

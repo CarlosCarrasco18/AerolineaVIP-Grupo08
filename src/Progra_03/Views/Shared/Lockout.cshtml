@@ -1,0 +1,16 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Cuenta bloqueada";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Cuenta bloqueada temporalmente</h1>
+        <p>Se superó el número de intentos permitidos. Intente nuevamente en unos minutos.</p>
+    </div>
+</div>
+
+<div class="container">
+    <a href="@Url.Action("Login", "Account")" class="btn btn-oro">Volver al inicio de sesión</a>
+</div>

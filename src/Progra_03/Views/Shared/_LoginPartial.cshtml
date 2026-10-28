@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNet.Identity
+@using Microsoft.AspNet.Identity.EntityFramework
+@using Progra_03.Models
+
+@if (Request.IsAuthenticated)
+{
+    using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "d-flex align-items-center gap-2 mb-0" }))
+    {
+        @Html.AntiForgeryToken()
+
+        var IdUsuario = User.Identity.GetUserId();
+
+        ApplicationDbContext db = new ApplicationDbContext();
+        var usermanager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(db));
+        var objUser = usermanager.FindById(IdUsuario);
+
+        HttpContext.Current.Session["User"] = objUser;
+
+        var nombre = User.Identity.GetUserName();
+
+        <a href="@Url.Action("Index", "Manage")" class="chip" title="Mi cuenta"><b>@nombre.Substring(0, 2).ToUpper()</b>@nombre</a>
+        <a class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">Salir</a>
+    }
+}
+else
+{
+    <a class="nav-link" href="@Url.Action("Register", "Account")">Registrarse</a>
+    <a class="btn btn-sm btn-oro px-3" href="@Url.Action("Login", "Account")">Iniciar sesión</a>
+}

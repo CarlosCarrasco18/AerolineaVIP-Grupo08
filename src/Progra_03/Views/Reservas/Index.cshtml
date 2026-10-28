@@ -1,0 +1,83 @@
+﻿@model IEnumerable<Progra_03.Models.Reserva>
+
+@{
+    ViewBag.Title = "Reservas";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Busque una reserva por código o por el documento del pasajero.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Reservas")
+
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <span class="text-muted small">@Html.ActionLink("← Administración", "Index", "Admin") · @Model.Count() registro(s)</span>
+    </div>
+
+    @using (Html.BeginForm("Index", "Reservas", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
+    {
+        <div class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label">Código de reserva o documento del pasajero</label>
+                <input type="text" name="buscar" value="@ViewBag.Buscar" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Estado</label>
+                @Html.DropDownList("estado", null, "Todos", new { @class = "form-select" })
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-azul w-100">Buscar</button>
+            </div>
+        </div>
+    }
+
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Reserva</th>
+                    <th>Creada</th>
+                    <th>Pasajeros</th>
+                    <th>Vuelos</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><b>@item.CodigoReserva</b></td>
+                        <td class="text-nowrap">@item.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                        <td class="small">@string.Join(", ", item.ReservaPasajeroVueloes.Select(a => a.Pasajero.NombreCompleto).Distinct())</td>
+                        <td class="small">@item.DescripcionVuelos()</td>
+                        <td class="text-nowrap">USD @item.CalcularTotal().ToString("N2")</td>
+                        <td><span class="estado e-@item.EstadoReservaCodigo">@item.EstadoReservaCodigo</span></td>
+                        <td class="text-end">
+                            <span class="acc">
+                                @Html.ActionLink("Detalles", "Details", new { id = item.ReservaId })
+                                @if (item.EstadoReservaCodigo == "CONFIRMADA")
+                                {
+                                    @Html.ActionLink("Check-in", "CheckIn", new { id = item.ReservaId })
+                                }
+                                @if (User.IsInRole("edit") && item.EstadoReservaCodigo == "PENDIENTE")
+                                {
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.ReservaId })
+                                }
+                                @if (User.IsInRole("delete"))
+                                {
+                                    @Html.ActionLink("Eliminar", "Delete", new { id = item.ReservaId }, new { @class = "borrar" })
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

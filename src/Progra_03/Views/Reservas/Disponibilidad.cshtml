@@ -1,0 +1,77 @@
+﻿@model List<Progra_03.Models.Vuelo>
+
+@{
+    ViewBag.Title = "Disponibilidad de asientos";
+    var asientos = (List<Progra_03.Models.Asiento>)ViewBag.Asientos;
+    var ocupados = (List<byte>)ViewBag.Ocupados;
+    var reservados = (List<byte>)ViewBag.Reservados;
+    int libres = asientos.Count(a => !ocupados.Contains(a.NumeroAsiento) && !reservados.Contains(a.NumeroAsiento));
+    int pasajeros = (int)ViewBag.Pasajeros;
+    var primero = Model.First();
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Disponibilidad de asientos</h1>
+        <p>Pantalla 7 · Asientos del vuelo en este momento. Se vuelven a revisar al confirmar la reserva.</p>
+        @Html.Partial("_Pasos", 1)
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                <h2>@primero.Frecuencia.Ruta.DescripcionCompleta · @primero.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</h2>
+                @if (primero.Aeronave != null)
+                {
+                    <p class="small text-muted mb-3">@primero.Aeronave.ModeloAeronave.NombreCompleto · @primero.Aeronave.Matricula · D derecha · I izquierda</p>
+                }
+                @if (Model.Count > 1)
+                {
+                    <div class="small mb-3">
+                        @foreach (var vuelo in Model)
+                        {
+                            <div>@vuelo.CodigoVuelo · @vuelo.Frecuencia.Ruta.Descripcion · @vuelo.FechaHoraSalida.ToString("dd/MM HH:mm")</div>
+                        }
+                        <div class="text-muted">El asiento elegido se mantiene en todos los tramos.</div>
+                    </div>
+                }
+                @Html.Partial("_MapaAsientos", false)
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="tarjeta">
+                <h2>Disponibilidad</h2>
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><div class="dato"><small>Capacidad</small><div>@asientos.Count</div></div></div>
+                    <div class="col-6"><div class="dato"><small>Ocupados</small><div>@asientos.Count(a => ocupados.Contains(a.NumeroAsiento))</div></div></div>
+                    <div class="col-6"><div class="dato"><small>Reservados</small><div>@asientos.Count(a => !ocupados.Contains(a.NumeroAsiento) && reservados.Contains(a.NumeroAsiento))</div></div></div>
+                    <div class="col-6"><div class="dato"><small>Disponibles</small><div style="color:#1e7b34">@libres</div></div></div>
+                </div>
+                <p class="small text-muted">Estado del vuelo: <span class="estado e-@primero.EstadoVueloCodigo">@primero.EstadoVueloCodigo</span> · Pasajeros: @pasajeros</p>
+                <div class="d-grid gap-2">
+                    @if (ViewBag.Message == null && libres >= pasajeros)
+                    {
+                        if (User.IsInRole("Cliente"))
+                        {
+                            <a class="btn btn-oro" href="@Url.Action("SeleccionAsiento", new { id = ViewBag.VueloId, itinerarioId = ViewBag.ItinerarioId, pasajeros = pasajeros })">Continuar</a>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info small mb-0">Solo una cuenta de tipo Cliente puede comprar pasajes.</div>
+                        }
+                    }
+                    else if (libres < pasajeros)
+                    {
+                        <div class="alert alert-warning small mb-0">No hay asientos suficientes para @pasajeros pasajero(s).</div>
+                    }
+                    <a class="btn btn-outline-secondary" href="@Url.Action("Disponibilidad", new { id = ViewBag.VueloId, itinerarioId = ViewBag.ItinerarioId, pasajeros = pasajeros })">Actualizar disponibilidad</a>
+                    <a class="btn btn-link btn-sm" href="javascript:history.back()">Regresar a los resultados</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

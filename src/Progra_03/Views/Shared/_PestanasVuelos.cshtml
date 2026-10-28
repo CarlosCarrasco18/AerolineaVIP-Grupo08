@@ -1,0 +1,10 @@
+﻿@model string
+
+<div class="pestanas mb-2">
+    <a class="@(Model == "Vuelos" ? "activo" : "")" href="@Url.Action("Index", "Vueloes")">Vuelos</a>
+    <a class="@(Model == "Frecuencias" ? "activo" : "")" href="@Url.Action("Index", "Frecuencias")">Frecuencias</a>
+    <a class="@(Model == "Rutas" ? "activo" : "")" href="@Url.Action("Index", "Rutas")">Rutas</a>
+    <a class="@(Model == "Aeropuertos" ? "activo" : "")" href="@Url.Action("Index", "Aeropuertos")">Aeropuertos</a>
+    <a class="@(Model == "Itinerarios" ? "activo" : "")" href="@Url.Action("Index", "Itinerarios")">Itinerarios</a>
+    <a class="@(Model == "Tramos" ? "activo" : "")" href="@Url.Action("Index", "TramoItinerarios")">Tramos</a>
+</div>

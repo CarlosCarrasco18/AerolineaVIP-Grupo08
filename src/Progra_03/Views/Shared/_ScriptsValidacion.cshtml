@@ -1,0 +1,11 @@
+﻿@Scripts.Render("~/bundles/jqueryval")
+<script>
+    $.validator.setDefaults({
+        highlight: function (elemento) {
+            $(elemento).addClass("is-invalid");
+        },
+        unhighlight: function (elemento) {
+            $(elemento).removeClass("is-invalid");
+        }
+    });
+</script>

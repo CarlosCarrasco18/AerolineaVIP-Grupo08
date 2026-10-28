@@ -1,0 +1,16 @@
+﻿@model System.Web.Mvc.HandleErrorInfo
+
+@{
+    ViewBag.Title = "Error";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>No se pudo completar la solicitud</h1>
+        <p>Ocurrió un error al procesar la operación. Intente nuevamente.</p>
+    </div>
+</div>
+
+<div class="container">
+    <a href="@Url.Action("Index", "Home")" class="btn btn-oro">Volver al inicio</a>
+</div>

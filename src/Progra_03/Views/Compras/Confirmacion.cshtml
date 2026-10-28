@@ -1,0 +1,42 @@
+﻿@model Progra_03.Models.Reserva
+
+@{
+    ViewBag.Title = "Confirmación";
+    var compra = (Progra_03.Models.Compra)ViewBag.Compra;
+    var pago = ViewBag.Pago as Progra_03.Models.Pago;
+    var comprobante = ViewBag.Comprobante as Progra_03.Models.Comprobante;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Confirmación</h1>
+        <p>Pantalla 12 · Su operación se registró correctamente.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                <div class="text-center mb-3">
+                    <div class="mx-auto mb-2" style="width:56px;height:56px;border-radius:50%;background:#e3f2e8;color:#1e7b34;font-size:28px;line-height:56px">&#10003;</div>
+                    <h3 class="fw-bold" style="color:#12233f">¡Compra confirmada!</h3>
+                    <div class="small text-muted">Código de reserva</div>
+                    <div class="fs-2 fw-bold dorado">@Model.CodigoReserva</div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3"><div class="dato"><small>Reserva</small><div><span class="estado e-@Model.EstadoReservaCodigo">@Model.EstadoReservaCodigo</span></div></div></div>
+                    <div class="col-6 col-md-3"><div class="dato"><small>Pago</small><div><span class="estado e-APROBADO">@(pago != null ? pago.EstadoPagoCodigo : "")</span></div></div></div>
+                    <div class="col-6 col-md-3"><div class="dato"><small>Comprobante</small><div style="font-size:.85rem">@(comprobante != null ? comprobante.NumeroComprobante : "")</div></div></div>
+                    <div class="col-6 col-md-3"><div class="dato"><small>Total</small><div style="font-size:1rem">USD @compra.Importe.ToString("N2")</div></div></div>
+                </div>
+                @Html.Partial("~/Views/Reservas/_DetalleReserva.cshtml", Model)
+                <div class="d-flex flex-wrap gap-2 justify-content-center mt-3">
+                    <a class="btn btn-azul" href="@Url.Action("MisReservas", "Reservas")">Ver mis reservas</a>
+                    <a class="btn btn-oro" href="@Url.Action("Index", "Comprobantes", new { numero = Model.CodigoReserva })">Ver comprobante</a>
+                    <a class="btn btn-outline-secondary" href="@Url.Action("Index", "Home")">Inicio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

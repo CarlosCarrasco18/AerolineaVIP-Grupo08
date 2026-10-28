@@ -1,0 +1,118 @@
+﻿@model IEnumerable<Progra_03.Models.Vuelo>
+
+@{
+    ViewBag.Title = "Resultados de búsqueda";
+    var origen = (Progra_03.Models.Aeropuerto)ViewBag.Origen;
+    var destino = (Progra_03.Models.Aeropuerto)ViewBag.Destino;
+    DateTime? fecha = ViewBag.Fecha;
+    int pasajeros = (int)ViewBag.Pasajeros;
+    var itinerarios = (List<Progra_03.Models.Itinerario>)ViewBag.Itinerarios;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Resultados de búsqueda</h1>
+        <p>Pantalla 6 · Horarios disponibles para su búsqueda.</p>
+        @Html.Partial("_Pasos", 0)
+    </div>
+</div>
+
+<div class="container">
+    <div class="tarjeta mb-4">
+        <div class="row align-items-center">
+            <div class="col"><small class="text-muted">Ruta</small><div class="fw-bold">@origen.NombreCompleto → @destino.NombreCompleto</div></div>
+            <div class="col"><small class="text-muted">Fecha</small><div class="fw-bold">@(fecha != null ? fecha.Value.ToString("dd/MM/yyyy") : "Próximos 30 días")</div></div>
+            <div class="col"><small class="text-muted">Pasajeros</small><div class="fw-bold">@pasajeros</div></div>
+            <div class="col text-end">
+                <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("Buscar", new { origen = origen.AeropuertoId, destino = destino.AeropuertoId, pasajeros = pasajeros })">Modificar búsqueda</a>
+            </div>
+        </div>
+    </div>
+
+    <h6 class="fw-bold mb-2">Vuelos directos</h6>
+    <div class="tabla mb-4">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Vuelo</th>
+                    <th>Fecha</th>
+                    <th>Salida</th>
+                    <th>Llegada</th>
+                    <th>Aeronave</th>
+                    <th>Libres</th>
+                    <th>Tarifa</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var vuelo in Model)
+                {
+                    <tr>
+                        <td><b>@vuelo.CodigoVuelo</b></td>
+                        <td>@vuelo.Frecuencia.NombreDia @vuelo.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                        <td>@vuelo.Frecuencia.HoraSalida.ToString(@"hh\:mm") @vuelo.Frecuencia.Ruta.Aeropuerto1.CodigoIATA</td>
+                        <td>@vuelo.Frecuencia.HoraLlegada.ToString(@"hh\:mm") @vuelo.Frecuencia.Ruta.Aeropuerto.CodigoIATA</td>
+                        <td>@(vuelo.Aeronave != null ? vuelo.Aeronave.Matricula : "Por asignar")</td>
+                        <td>@vuelo.CalcularAsientosLibres() de @vuelo.CalcularCapacidad()</td>
+                        <td class="text-nowrap">USD @vuelo.Frecuencia.Ruta.TarifaReferencial.ToString("N2")</td>
+                        <td class="text-end">
+                            @if (vuelo.PermiteVenta() && vuelo.CalcularAsientosLibres() >= pasajeros)
+                            {
+                                <a class="btn btn-sm btn-oro" href="@Url.Action("Disponibilidad", "Reservas", new { id = vuelo.VueloId, pasajeros = pasajeros })">Ver disponibilidad</a>
+                            }
+                            else
+                            {
+                                <span class="estado e-rojo">No disponible</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr><td colspan="8" class="text-muted">No hay vuelos directos para esta búsqueda.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <h6 class="fw-bold mb-2">Itinerarios (ida y vuelta o con escala)</h6>
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Itinerario</th>
+                    <th>Tramos</th>
+                    <th>Libres</th>
+                    <th>Tarifa</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var itinerario in itinerarios)
+                {
+                    bool disponible = itinerario.TramoItinerarios.All(t => t.Vuelo.PermiteVenta() && t.Vuelo.CalcularAsientosLibres() >= pasajeros);
+                    <tr>
+                        <td><b>@itinerario.Nombre</b></td>
+                        <td>@itinerario.DescripcionTramos()</td>
+                        <td>@(itinerario.TramoItinerarios.Any() ? itinerario.TramoItinerarios.Min(t => t.Vuelo.CalcularAsientosLibres()) : 0) de @(itinerario.TramoItinerarios.Any() ? itinerario.TramoItinerarios.Min(t => t.Vuelo.CalcularCapacidad()) : 0)</td>
+                        <td class="text-nowrap">USD @itinerario.CalcularTarifa().ToString("N2")</td>
+                        <td class="text-end">
+                            @if (disponible)
+                            {
+                                <a class="btn btn-sm btn-oro" href="@Url.Action("Disponibilidad", "Reservas", new { itinerarioId = itinerario.ItinerarioId, pasajeros = pasajeros })">Ver disponibilidad</a>
+                            }
+                            else
+                            {
+                                <span class="estado e-rojo">No disponible</span>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (itinerarios.Count == 0)
+                {
+                    <tr><td colspan="5" class="text-muted">No hay itinerarios para esta búsqueda.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

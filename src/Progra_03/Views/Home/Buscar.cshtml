@@ -1,0 +1,180 @@
+﻿@{
+    ViewBag.Title = "Buscar vuelos";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Buscar vuelos</h1>
+        <p>Pantalla 5 · Elija origen y destino; el calendario muestra solo los días con vuelos.</p>
+        @Html.Partial("_Pasos", 0)
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="tarjeta">
+                <h2>Datos del viaje</h2>
+                @using (Html.BeginForm("Resultados", "Home", FormMethod.Get, new { id = "formBusqueda" }))
+                {
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Origen</label>
+                            @Html.DropDownList("origen", null, "Seleccione...", new { @class = "form-select" })
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Destino</label>
+                            @Html.DropDownList("destino", null, "Seleccione...", new { @class = "form-select" })
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Fecha</label>
+                            <input type="hidden" id="fecha" name="fecha" />
+                            <input type="text" id="textoFecha" class="form-control" placeholder="Elija en el calendario" readonly />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Pasajeros</label>
+                            @Html.DropDownList("pasajeros", null, new { @class = "form-select" })
+                        </div>
+                        <div class="col-12">
+                            <div id="errorBusqueda" class="text-danger small d-none"></div>
+                        </div>
+                        <div class="col-12 d-grid">
+                            <button type="submit" class="btn btn-oro">Buscar</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="tarjeta">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <button type="button" class="btn btn-sm btn-light" id="mesAnterior">&lt;</button>
+                    <b id="tituloMes"></b>
+                    <button type="button" class="btn btn-sm btn-light" id="mesSiguiente">&gt;</button>
+                </div>
+                <div class="cal text-center small fw-bold text-muted mb-1">
+                    <div>Lu</div><div>Ma</div><div>Mi</div><div>Ju</div><div>Vi</div><div>Sá</div><div>Do</div>
+                </div>
+                <div class="cal" id="diasCalendario"></div>
+                <div class="small text-muted mt-3" id="ayudaCalendario">Seleccione el origen y el destino para ver los días con vuelos.</div>
+                <div class="ley mt-2">
+                    <span><i style="background:#e3f2e8;border:1px solid #1e8a4c"></i>Con vuelos</span>
+                    <span><i style="background:#fde4e4"></i>Lleno</span>
+                    <span><i style="background:#fff;border:1px solid #e6e9ef"></i>Sin vuelos</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_FiltroDestinos", (List<Progra_03.Models.Ruta>)ViewBag.Rutas)
+    <script>
+        var urlFechas = "@Url.Action("FechasDisponibles", "Home")";
+        var nombresMes = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        var fechas = {};
+        var hoy = new Date();
+        var mesVisible = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        var primerMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        var ultimoMes = new Date(hoy.getFullYear(), hoy.getMonth() + 12, 1);
+
+        function claveFecha(anio, mes, dia) {
+            return anio + "-" + ("0" + (mes + 1)).slice(-2) + "-" + ("0" + dia).slice(-2);
+        }
+
+        function dibujarCalendario() {
+            var anio = mesVisible.getFullYear();
+            var mes = mesVisible.getMonth();
+            var espacios = (new Date(anio, mes, 1).getDay() + 6) % 7;
+            var dias = new Date(anio, mes + 1, 0).getDate();
+            var contenedor = $("#diasCalendario").empty();
+
+            $("#tituloMes").text(nombresMes[mes] + " " + anio);
+
+            for (var i = 0; i < espacios; i++) {
+                contenedor.append("<div></div>");
+            }
+
+            for (var dia = 1; dia <= dias; dia++) {
+                var clave = claveFecha(anio, mes, dia);
+                var boton = $("<button type='button'></button>").text(dia).attr("data-fecha", clave);
+                if (fechas[clave] === "disponible") {
+                    boton.addClass(clave === $("#fecha").val() ? "sel" : "si");
+                } else if (fechas[clave] === "lleno") {
+                    boton.css("background", "#fde4e4").prop("disabled", true).attr("title", "Vuelo lleno");
+                } else {
+                    boton.prop("disabled", true);
+                }
+                contenedor.append(boton);
+            }
+
+            $("#mesAnterior").prop("disabled", mesVisible <= primerMes);
+            $("#mesSiguiente").prop("disabled", mesVisible >= ultimoMes);
+        }
+
+        function cargarFechas() {
+            var origen = $("#origen").val();
+            var destino = $("#destino").val();
+            fechas = {};
+            $("#fecha").val("");
+            $("#textoFecha").val("");
+
+            if (!origen || !destino) {
+                $("#ayudaCalendario").text("Seleccione el origen y el destino para ver los días con vuelos.");
+                dibujarCalendario();
+                return;
+            }
+
+            if (origen === destino) {
+                $("#ayudaCalendario").text("El destino debe ser diferente del origen.");
+                dibujarCalendario();
+                return;
+            }
+
+            $.getJSON(urlFechas, { origen: origen, destino: destino, pasajeros: $("#pasajeros").val() }, function (datos) {
+                fechas = datos;
+                var disponibles = Object.keys(datos).filter(function (c) { return datos[c] === "disponible"; }).sort();
+                if (disponibles.length > 0) {
+                    var primera = disponibles[0].split("-");
+                    mesVisible = new Date(parseInt(primera[0]), parseInt(primera[1]) - 1, 1);
+                    $("#ayudaCalendario").text("Haga clic en un día verde para elegir la fecha.");
+                } else {
+                    $("#ayudaCalendario").text("No hay vuelos disponibles para esta ruta.");
+                }
+                dibujarCalendario();
+            });
+        }
+
+        $("#diasCalendario").on("click", "button[data-fecha]", function () {
+            var clave = $(this).attr("data-fecha");
+            var partes = clave.split("-");
+            $("#fecha").val(clave);
+            $("#textoFecha").val(partes[2] + "/" + partes[1] + "/" + partes[0]);
+            $("#errorBusqueda").addClass("d-none");
+            dibujarCalendario();
+        });
+
+        $("#mesAnterior").on("click", function () {
+            mesVisible = new Date(mesVisible.getFullYear(), mesVisible.getMonth() - 1, 1);
+            dibujarCalendario();
+        });
+
+        $("#mesSiguiente").on("click", function () {
+            mesVisible = new Date(mesVisible.getFullYear(), mesVisible.getMonth() + 1, 1);
+            dibujarCalendario();
+        });
+
+        $("#origen, #destino, #pasajeros").on("change", cargarFechas);
+
+        $("#formBusqueda").on("submit", function (evento) {
+            if (!$("#origen").val() || !$("#destino").val() || !$("#fecha").val()) {
+                evento.preventDefault();
+                $("#errorBusqueda").text("Seleccione el origen, el destino y una fecha del calendario.").removeClass("d-none");
+            }
+        });
+
+        cargarFechas();
+    </script>
+}
