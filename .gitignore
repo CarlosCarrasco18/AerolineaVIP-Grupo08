@@ -1,0 +1,15 @@
+# Visual Studio / ASP.NET
+.vs/
+bin/
+obj/
+packages/
+*.user
+*.suo
+*.cache
+*.log
+
+# Compilación y temporales
+[Dd]ebug/
+[Rr]elease/
+App_Data/*.mdf
+App_Data/*.ldf
