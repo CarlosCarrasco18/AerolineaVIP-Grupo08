@@ -153,6 +153,7 @@ namespace Progra_03.Controllers
             if (!Pasajero.CedulaValida(model.Cedula))
             {
                 ModelState.AddModelError("Cedula", "La cédula ingresada no es válida.");
+                ViewBag.Message = "La cédula ingresada no es válida.";
             }
 
             if (ModelState.IsValid)

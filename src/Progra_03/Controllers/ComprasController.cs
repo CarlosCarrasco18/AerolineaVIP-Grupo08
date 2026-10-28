@@ -92,6 +92,18 @@ namespace Progra_03.Controllers
 
             if (!ModelState.IsValid)
             {
+                List<string> mensajes = new List<string>();
+                foreach (string campo in new[] { "NumeroTarjeta", "CodigoSeguridad", "Vencimiento" })
+                {
+                    if (ModelState.ContainsKey(campo))
+                    {
+                        mensajes.AddRange(ModelState[campo].Errors.Select(e => e.ErrorMessage));
+                    }
+                }
+                if (mensajes.Count > 0)
+                {
+                    ViewBag.Message = string.Join(" ", mensajes);
+                }
                 CargarListas(modelo);
                 ViewBag.Reserva = reserva;
                 return View(modelo);

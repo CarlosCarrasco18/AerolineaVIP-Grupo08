@@ -175,6 +175,7 @@ namespace Progra_03.Controllers
 
             List<int> vueloIds = seleccion.VueloIds;
             List<string> documentos = new List<string>();
+            List<string> mensajes = new List<string>();
             for (int i = 0; i < pasajeros.Count; i++)
             {
                 if (pasajeros[i].NumeroDocumento != null)
@@ -186,17 +187,20 @@ namespace Progra_03.Controllers
                 if (error != null)
                 {
                     ModelState.AddModelError("[" + i + "].NumeroDocumento", error);
+                    mensajes.Add("Pasajero " + (i + 1) + ": " + error);
                 }
 
                 if (documentos.Contains(pasajeros[i].NumeroDocumento))
                 {
                     ModelState.AddModelError("[" + i + "].NumeroDocumento", "Este documento ya está en otro pasajero de la reserva.");
+                    mensajes.Add("Pasajero " + (i + 1) + ": este documento ya está en otro pasajero de la reserva.");
                 }
                 documentos.Add(pasajeros[i].NumeroDocumento);
 
                 if (pasajeros[i].FechaNacimiento != null && pasajeros[i].FechaNacimiento > DateTime.Today)
                 {
                     ModelState.AddModelError("[" + i + "].FechaNacimiento", "La fecha de nacimiento no puede ser futura.");
+                    mensajes.Add("Pasajero " + (i + 1) + ": la fecha de nacimiento no puede ser futura.");
                 }
             }
 
@@ -216,6 +220,7 @@ namespace Progra_03.Controllers
                         if (yaViaja)
                         {
                             ModelState.AddModelError("[" + i + "].NumeroDocumento", "Este pasajero ya tiene un asiento en este vuelo.");
+                            mensajes.Add("Pasajero " + (i + 1) + ": ya tiene un asiento en este vuelo.");
                         }
 
                         registrado.Nombres = pasajeros[i].Nombres;
@@ -238,6 +243,10 @@ namespace Progra_03.Controllers
 
             if (!ModelState.IsValid)
             {
+                if (mensajes.Count > 0)
+                {
+                    ViewBag.Message = string.Join(" ", mensajes);
+                }
                 CargarResumen(seleccion);
                 return View(pasajeros);
             }
