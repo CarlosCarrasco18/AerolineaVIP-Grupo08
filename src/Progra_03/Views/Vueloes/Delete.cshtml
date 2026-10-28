@@ -1,0 +1,50 @@
+﻿@model Progra_03.Models.Vuelo
+
+@{
+    ViewBag.Title = "Eliminar vuelo";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Vuelos e itinerarios</h1>
+        <p>Pantalla 18 · Administración de vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasVuelos", "Vuelos")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            @Html.Partial("_Mensaje")
+
+            <div class="tarjeta">
+                <h2>¿Desea eliminar este registro?</h2>
+                <dl class="row mb-3">
+                    <dt class="col-sm-4 text-muted">Vuelo</dt>
+                    <dd class="col-sm-8">@Model.CodigoVuelo</dd>
+                    <dt class="col-sm-4 text-muted">Ruta</dt>
+                    <dd class="col-sm-8">@Model.Frecuencia.Ruta.DescripcionCompleta</dd>
+                    <dt class="col-sm-4 text-muted">Fecha y hora</dt>
+                    <dd class="col-sm-8">@Model.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm") - @Model.FechaHoraLlegada.ToString("HH:mm")</dd>
+                    <dt class="col-sm-4 text-muted">Aeronave</dt>
+                    <dd class="col-sm-8">@(Model.Aeronave != null ? Model.Aeronave.Descripcion : "Sin asignar")</dd>
+                    <dt class="col-sm-4 text-muted">Estado</dt>
+                    <dd class="col-sm-8"><span class="estado e-@(Model.EstadoVueloCodigo)">@Model.EstadoVueloCodigo</span></dd>
+                </dl>
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2">
+                        @if (ViewBag.Message == null)
+                        {
+                            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+                        }
+                        @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

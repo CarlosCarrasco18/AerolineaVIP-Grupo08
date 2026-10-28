@@ -1,0 +1,61 @@
+﻿@model Progra_03.Models.Aeronave
+
+@{
+    ViewBag.Title = "Detalle de aeronave";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Aeronaves</h1>
+        <p>Pantalla 19 · Flota de aeronaves con capacidad máxima de 7 asientos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasAeronaves", "Aeronaves")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                <h2>Detalle de aeronave</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Matrícula</dt>
+                    <dd class="col-sm-8">@Model.Matricula</dd>
+                    <dt class="col-sm-4 text-muted">Modelo</dt>
+                    <dd class="col-sm-8">@Model.ModeloAeronave.NombreCompleto</dd>
+                    <dt class="col-sm-4 text-muted">Capacidad</dt>
+                    <dd class="col-sm-8">@Model.ModeloAeronave.CapacidadAsientos asientos</dd>
+                    <dt class="col-sm-4 text-muted">Estado</dt>
+                    <dd class="col-sm-8"><span class="estado e-@(Model.EstadoAeronaveCodigo)">@Model.EstadoAeronaveCodigo</span></dd>
+                    <dt class="col-sm-4 text-muted">Vuelos asignados</dt>
+                    <dd class="col-sm-8">@Model.Vueloes.Count</dd>
+                </dl>
+            </div>
+
+            <div class="tarjeta mt-3">
+                <h2>Próximos vuelos</h2>
+                <table class="table table-sm mb-0">
+                    <tr><th>Vuelo</th><th>Ruta</th><th>Salida</th><th>Ocupación</th><th>Estado</th></tr>
+                    @foreach (var vuelo in Model.Vueloes.Where(v => v.FechaOperacion >= DateTime.Today).OrderBy(v => v.FechaOperacion).Take(10))
+                    {
+                        <tr>
+                            <td>@vuelo.CodigoVuelo</td>
+                            <td>@vuelo.Frecuencia.Ruta.Descripcion</td>
+                            <td>@vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@vuelo.CalcularAsientosOcupados() / @vuelo.CalcularCapacidad()</td>
+                            <td><span class="estado e-@vuelo.EstadoVueloCodigo">@vuelo.EstadoVueloCodigo</span></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                @if (User.IsInRole("edit"))
+                {
+                    @Html.ActionLink("Editar", "Edit", new { id = Model.AeronaveId }, new { @class = "btn btn-oro" })
+                }
+                @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+            </div>
+        </div>
+    </div>
+</div>

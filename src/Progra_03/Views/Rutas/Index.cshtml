@@ -1,0 +1,62 @@
+﻿@model IEnumerable<Progra_03.Models.Ruta>
+
+@{
+    ViewBag.Title = "Vuelos e itinerarios";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Vuelos e itinerarios</h1>
+        <p>Pantalla 18 · Administración de vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasVuelos", "Rutas")
+
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <span class="text-muted small">@Html.ActionLink("← Administración", "Index", "Admin") · @Model.Count() registro(s)</span>
+        @if (User.IsInRole("create"))
+        {
+            @Html.ActionLink("+ Crear nuevo", "Create", null, new { @class = "btn btn-oro btn-sm" })
+        }
+    </div>
+
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Ruta</th>
+                    <th>Tarifa</th>
+                    <th>Frecuencias</th>
+                    <th>Activa</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><b>@item.Descripcion</b><div class="small text-muted">@item.DescripcionCompleta</div></td>
+                        <td class="text-nowrap">USD @item.TarifaReferencial.ToString("N2")</td>
+                        <td>@item.Frecuencias.Count</td>
+                        <td>@(item.Activa ? "Sí" : "No")</td>
+                        <td class="text-end">
+                            <span class="acc">
+                                @Html.ActionLink("Detalles", "Details", new { id = item.RutaId })
+                                @if (User.IsInRole("edit"))
+                                {
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.RutaId })
+                                }
+                                @if (User.IsInRole("delete"))
+                                {
+                                    @Html.ActionLink("Eliminar", "Delete", new { id = item.RutaId }, new { @class = "borrar" })
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

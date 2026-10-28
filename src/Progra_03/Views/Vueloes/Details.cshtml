@@ -1,0 +1,66 @@
+﻿@model Progra_03.Models.Vuelo
+
+@{
+    ViewBag.Title = "Detalle de vuelo";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Vuelos e itinerarios</h1>
+        <p>Pantalla 18 · Administración de vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasVuelos", "Vuelos")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                <h2>Detalle de vuelo</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Vuelo</dt>
+                    <dd class="col-sm-8">@Model.CodigoVuelo</dd>
+                    <dt class="col-sm-4 text-muted">Ruta</dt>
+                    <dd class="col-sm-8">@Model.Frecuencia.Ruta.DescripcionCompleta</dd>
+                    <dt class="col-sm-4 text-muted">Fecha y hora</dt>
+                    <dd class="col-sm-8">@Model.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm") - @Model.FechaHoraLlegada.ToString("HH:mm")</dd>
+                    <dt class="col-sm-4 text-muted">Aeronave</dt>
+                    <dd class="col-sm-8">@(Model.Aeronave != null ? Model.Aeronave.Descripcion : "Sin asignar")</dd>
+                    <dt class="col-sm-4 text-muted">Estado</dt>
+                    <dd class="col-sm-8"><span class="estado e-@(Model.EstadoVueloCodigo)">@Model.EstadoVueloCodigo</span></dd>
+                </dl>
+            </div>
+
+            <div class="tarjeta mt-3">
+                <div class="row g-2 mb-3">
+                    <div class="col"><div class="dato"><small>Capacidad</small><div>@Model.CalcularCapacidad()</div></div></div>
+                    <div class="col"><div class="dato"><small>Ocupados</small><div>@Model.CalcularAsientosOcupados()</div></div></div>
+                    <div class="col"><div class="dato"><small>Reservados</small><div>@Model.CalcularAsientosReservados()</div></div></div>
+                    <div class="col"><div class="dato"><small>Libres</small><div>@Model.CalcularAsientosLibres()</div></div></div>
+                </div>
+                <h2>Pasajeros del vuelo</h2>
+                <table class="table table-sm mb-0">
+                    <tr><th>Reserva</th><th>Pasajero</th><th>Asiento</th><th>Estado</th></tr>
+                    @foreach (var asignacion in Model.ReservaPasajeroVueloes.OrderBy(a => a.NumeroAsiento))
+                    {
+                        <tr>
+                            <td>@asignacion.Reserva.CodigoReserva</td>
+                            <td>@asignacion.Pasajero.NombreCompleto</td>
+                            <td>@asignacion.CodigoAsiento</td>
+                            <td><span class="estado e-@asignacion.EstadoAsignacionCodigo">@asignacion.EstadoAsignacionCodigo</span></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                @if (User.IsInRole("edit"))
+                {
+                    @Html.ActionLink("Editar", "Edit", new { id = Model.VueloId }, new { @class = "btn btn-oro" })
+                }
+                @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+            </div>
+        </div>
+    </div>
+</div>

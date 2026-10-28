@@ -1,0 +1,52 @@
+﻿@{
+    ViewBag.Title = "Administración";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Administración</h1>
+        <p>Pantalla 17 · Accesos a los módulos según sus permisos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @if (!User.IsInRole("view"))
+    {
+        <div class="alert alert-info small">Su usuario tiene permisos para editar y eliminar registros. Ingrese al registro desde su enlace directo, como <b>/Vueloes/Edit/1</b>.</div>
+    }
+
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-3">
+            <a class="tarjeta modulo" href="@Url.Action("Index", "Vueloes")">
+                <div class="ico">V</div>
+                <h2 class="mb-1">Vuelos e itinerarios</h2>
+                <p class="small text-muted mb-2">Vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
+                <span class="small dorado fw-bold">Entrar →</span>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a class="tarjeta modulo" href="@Url.Action("Index", "Aeronaves")">
+                <div class="ico">A</div>
+                <h2 class="mb-1">Aeronaves</h2>
+                <p class="small text-muted mb-2">Flota, modelos y estado operativo.</p>
+                <span class="small dorado fw-bold">Entrar →</span>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a class="tarjeta modulo" href="@Url.Action("Index", "Reservas")">
+                <div class="ico">U</div>
+                <h2 class="mb-1">Usuarios, pasajeros y reservas</h2>
+                <p class="small text-muted mb-2">Consulta de usuarios, pasajeros y reservas. Atención de counter.</p>
+                <span class="small dorado fw-bold">Entrar →</span>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a class="tarjeta modulo" href="@Url.Action("Index", "Reportes")">
+                <div class="ico">R</div>
+                <h2 class="mb-1">Reportes</h2>
+                <p class="small text-muted mb-2">Ocupación y ventas por fecha, ruta y aeronave.</p>
+                <span class="small dorado fw-bold">Entrar →</span>
+            </a>
+        </div>
+    </div>
+</div>

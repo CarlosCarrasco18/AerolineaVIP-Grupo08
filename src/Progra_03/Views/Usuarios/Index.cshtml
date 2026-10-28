@@ -1,0 +1,57 @@
+﻿@model IEnumerable<Progra_03.Models.UsuarioViewModel>
+
+@{
+    ViewBag.Title = "Usuarios";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Usuarios del sistema. Los roles se asignan por código en Global.asax.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Usuarios")
+
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <span class="text-muted small">@Html.ActionLink("← Administración", "Index", "Admin") · @Model.Count() registro(s)</span>
+    </div>
+
+    @using (Html.BeginForm("Index", "Usuarios", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
+    {
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label">Usuario o correo</label>
+                <input type="text" name="buscar" value="@ViewBag.Buscar" class="form-control" />
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-azul w-100">Buscar</button>
+            </div>
+        </div>
+    }
+
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.UserName)</th>
+                    <th>@Html.DisplayNameFor(model => model.Email)</th>
+                    <th>@Html.DisplayNameFor(model => model.Cedula)</th>
+                    <th>@Html.DisplayNameFor(model => model.Roles)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><b>@item.UserName</b></td>
+                        <td>@item.Email</td>
+                        <td>@item.Cedula</td>
+                        <td>@item.Roles</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

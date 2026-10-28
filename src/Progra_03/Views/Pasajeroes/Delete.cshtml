@@ -1,0 +1,54 @@
+﻿@model Progra_03.Models.Pasajero
+
+@{
+    ViewBag.Title = "Eliminar pasajero";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Consulta y administración de usuarios, pasajeros y reservas.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Pasajeros")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            @Html.Partial("_Mensaje")
+
+            <div class="tarjeta">
+                <h2>¿Desea eliminar este registro?</h2>
+                <dl class="row mb-3">
+                    <dt class="col-sm-4 text-muted">Documento</dt>
+                    <dd class="col-sm-8">@Model.TipoDocumentoCodigo @Model.NumeroDocumento</dd>
+                    <dt class="col-sm-4 text-muted">Nombres</dt>
+                    <dd class="col-sm-8">@Model.Nombres</dd>
+                    <dt class="col-sm-4 text-muted">Apellidos</dt>
+                    <dd class="col-sm-8">@Model.Apellidos</dd>
+                    <dt class="col-sm-4 text-muted">Fecha de nacimiento</dt>
+                    <dd class="col-sm-8">@(Model.FechaNacimiento != null ? Model.FechaNacimiento.Value.ToString("dd/MM/yyyy") : "")</dd>
+                    <dt class="col-sm-4 text-muted">Correo</dt>
+                    <dd class="col-sm-8">@Model.Correo</dd>
+                    <dt class="col-sm-4 text-muted">Teléfono</dt>
+                    <dd class="col-sm-8">@Model.Telefono</dd>
+                    <dt class="col-sm-4 text-muted">Fecha de registro</dt>
+                    <dd class="col-sm-8">@Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</dd>
+                </dl>
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2">
+                        @if (ViewBag.Message == null)
+                        {
+                            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+                        }
+                        @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

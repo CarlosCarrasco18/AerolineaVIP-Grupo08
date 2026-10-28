@@ -1,0 +1,50 @@
+﻿@model Progra_03.Models.Aeronave
+
+@{
+    ViewBag.Title = "Eliminar aeronave";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Aeronaves</h1>
+        <p>Pantalla 19 · Flota de aeronaves con capacidad máxima de 7 asientos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasAeronaves", "Aeronaves")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            @Html.Partial("_Mensaje")
+
+            <div class="tarjeta">
+                <h2>¿Desea eliminar este registro?</h2>
+                <dl class="row mb-3">
+                    <dt class="col-sm-4 text-muted">Matrícula</dt>
+                    <dd class="col-sm-8">@Model.Matricula</dd>
+                    <dt class="col-sm-4 text-muted">Modelo</dt>
+                    <dd class="col-sm-8">@Model.ModeloAeronave.NombreCompleto</dd>
+                    <dt class="col-sm-4 text-muted">Capacidad</dt>
+                    <dd class="col-sm-8">@Model.ModeloAeronave.CapacidadAsientos asientos</dd>
+                    <dt class="col-sm-4 text-muted">Estado</dt>
+                    <dd class="col-sm-8"><span class="estado e-@(Model.EstadoAeronaveCodigo)">@Model.EstadoAeronaveCodigo</span></dd>
+                    <dt class="col-sm-4 text-muted">Vuelos asignados</dt>
+                    <dd class="col-sm-8">@Model.Vueloes.Count</dd>
+                </dl>
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2">
+                        @if (ViewBag.Message == null)
+                        {
+                            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+                        }
+                        @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

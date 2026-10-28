@@ -1,0 +1,48 @@
+﻿@model Progra_03.Models.Aeropuerto
+
+@{
+    ViewBag.Title = "Eliminar aeropuerto";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Vuelos e itinerarios</h1>
+        <p>Pantalla 18 · Administración de vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasVuelos", "Aeropuertos")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            @Html.Partial("_Mensaje")
+
+            <div class="tarjeta">
+                <h2>¿Desea eliminar este registro?</h2>
+                <dl class="row mb-3">
+                    <dt class="col-sm-4 text-muted">Código IATA</dt>
+                    <dd class="col-sm-8">@Model.CodigoIATA</dd>
+                    <dt class="col-sm-4 text-muted">Nombre</dt>
+                    <dd class="col-sm-8">@Model.Nombre</dd>
+                    <dt class="col-sm-4 text-muted">Localidad</dt>
+                    <dd class="col-sm-8">@Model.Localidad</dd>
+                    <dt class="col-sm-4 text-muted">Activo</dt>
+                    <dd class="col-sm-8">@(Model.Activo ? "Sí" : "No")</dd>
+                </dl>
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2">
+                        @if (ViewBag.Message == null)
+                        {
+                            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+                        }
+                        @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
