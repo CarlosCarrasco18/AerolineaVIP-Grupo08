@@ -1,0 +1,55 @@
+﻿@using Progra_03.Models
+@model LoginViewModel
+
+@{
+    ViewBag.Title = "Iniciar sesión";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Iniciar sesión</h1>
+        <p>Pantalla 2 · Ingrese con su nombre de usuario y contraseña.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="tarjeta">
+                @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { role = "form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.UserName, new { @class = "form-label" })
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", autofocus = "autofocus" })
+                        @Html.ValidationMessageFor(m => m.UserName, "Ingrese su nombre de usuario", new { @class = "text-info" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(m => m.Password, "Ingrese su contraseña", new { @class = "text-info" })
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="form-check small">
+                            @Html.CheckBoxFor(m => m.RememberMe, new { @class = "form-check-input" })
+                            @Html.LabelFor(m => m.RememberMe, new { @class = "form-check-label" })
+                        </div>
+                        @Html.ActionLink("¿Olvidó su contraseña?", "ForgotPassword", null, new { @class = "small" })
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-oro py-2">Iniciar sesión</button>
+                    </div>
+                }
+                <p class="small text-center text-muted mt-3 mb-0">
+                    ¿No tiene una cuenta? @Html.ActionLink("Crear una cuenta", "Register")
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_ScriptsValidacion")
+}

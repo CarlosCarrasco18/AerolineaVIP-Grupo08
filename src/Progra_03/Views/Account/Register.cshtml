@@ -1,0 +1,162 @@
+﻿@model Progra_03.Models.RegisterViewModel
+
+@{
+    ViewBag.Title = "Crear cuenta";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Crear cuenta</h1>
+        <p>Pantalla 3 · Cliente: compra pasajes. Pasajero: consulta sus viajes con su cédula.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form", id = "formRegistro" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.Partial("_Mensaje")
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="row g-3">
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.UserName, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.UserName, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.UserName, "Ingrese un nombre de usuario válido", new { @class = "text-info" })
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en UserName: @ex.Message</div>
+                        }
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Email, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
+                                @Html.ValidationMessageFor(m => m.Email, "Ingrese un correo válido", new { @class = "text-info" })
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en Email: @ex.Message</div>
+                        }
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Cedula, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", maxlength = "10", inputmode = "numeric" })
+                                @Html.ValidationMessageFor(m => m.Cedula, "Ingrese una cédula válida", new { @class = "text-info", id = "errorCedula" })
+                                <div id="mensajeCedula" class="text-danger small"></div>
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en Cedula: @ex.Message</div>
+                        }
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Rol, new { @class = "form-label" })
+                                @Html.DropDownList("Rol", null, "Seleccione...", new { @class = "form-select" })
+                                @Html.ValidationMessageFor(m => m.Rol, "Seleccione el tipo de cuenta", new { @class = "text-info" })
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en Rol: @ex.Message</div>
+                        }
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Password, new { @class = "form-label" })
+                                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.Password, "Ingrese una contraseña válida", new { @class = "text-info" })
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en Password: @ex.Message</div>
+                        }
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })
+                                @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.ConfirmPassword, "Las contraseñas deben coincidir", new { @class = "text-info" })
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en ConfirmPassword: @ex.Message</div>
+                        }
+                        <div class="col-12 small text-muted">La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo.</div>
+                        <div class="col-12">
+                            <div class="small p-3 rounded-3 bg-light">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="checkbox" id="aceptaPrivacidad" />
+                                    <label class="form-check-label" for="aceptaPrivacidad">Acepto el aviso de privacidad y las condiciones de uso de Aerolínea VIP. Mis datos se usarán solo para gestionar mis reservas y viajes.</label>
+                                </div>
+                            </div>
+                            <div class="text-danger small mt-1 d-none" id="errorPrivacidad">Debe aceptar el aviso de privacidad.</div>
+                        </div>
+                        <div class="col-6 d-grid">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                        <div class="col-6 d-grid">
+                            <button type="submit" class="btn btn-oro">Crear cuenta</button>
+                        </div>
+                    </div>
+                }
+                <p class="small text-center text-muted mt-3 mb-0">
+                    ¿Ya tiene una cuenta? @Html.ActionLink("Iniciar sesión", "Login")
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_ScriptsValidacion")
+    @Html.Partial("_ValidarCedula")
+    <script>
+        $("#Cedula").on("input", function () {
+            this.value = this.value.replace(/\D/g, "").slice(0, 10);
+        });
+
+        $("#Cedula").on("blur", function () {
+            if (this.value.length > 0 && !validarCedulaJS(this.value)) {
+                mostrarMensaje("#mensajeCedula", this, "La cédula ingresada no es válida.");
+            } else {
+                mostrarMensaje("#mensajeCedula", this, "");
+            }
+        });
+
+        $("#formRegistro").on("submit", function (evento) {
+            var correcto = true;
+
+            if (!$("#aceptaPrivacidad").is(":checked")) {
+                $("#errorPrivacidad").removeClass("d-none");
+                correcto = false;
+            } else {
+                $("#errorPrivacidad").addClass("d-none");
+            }
+
+            if (!validarCedulaJS($("#Cedula").val())) {
+                if ($("#Cedula").val() !== "") {
+                    mostrarMensaje("#mensajeCedula", "#Cedula", "La cédula ingresada no es válida.");
+                }
+                correcto = false;
+            }
+
+            if (!correcto) {
+                evento.preventDefault();
+            }
+        });
+    </script>
+}

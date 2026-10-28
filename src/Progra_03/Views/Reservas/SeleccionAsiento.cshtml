@@ -1,0 +1,87 @@
+﻿@model List<Progra_03.Models.Vuelo>
+
+@{
+    ViewBag.Title = "Selección de asiento";
+    int pasajeros = (int)ViewBag.Pasajeros;
+    var primero = Model.First();
+    decimal tarifa = Model.Sum(v => v.Frecuencia.Ruta.TarifaReferencial);
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Selección de asiento</h1>
+        <p>Pantalla 8 · Elija un asiento por pasajero y continúe a los datos de los pasajeros.</p>
+        @Html.Partial("_Pasos", 2)
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    @using (Html.BeginForm("SeleccionAsiento", "Reservas", new { id = ViewBag.VueloId, itinerarioId = ViewBag.ItinerarioId }, FormMethod.Post, new { id = "formAsientos" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="pasajeros" value="@pasajeros" />
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="tarjeta">
+                    <h2>Elija sus asientos</h2>
+                    <p class="small text-muted mb-3">Haga clic en @pasajeros asiento(s) verde(s), uno por pasajero.</p>
+                    @Html.Partial("_MapaAsientos", true)
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="resumen">
+                    <div class="dorado">SU SELECCIÓN</div>
+                    <h5 class="mt-2 mb-1">@primero.Frecuencia.Ruta.DescripcionCompleta</h5>
+                    <div class="small text-white-50 mb-3">
+                        @foreach (var vuelo in Model)
+                        {
+                            <div>@vuelo.CodigoVuelo · @vuelo.Frecuencia.Ruta.Descripcion · @vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</div>
+                        }
+                    </div>
+                    <div class="d-flex justify-content-between small"><span>Pasajeros</span><b>@pasajeros</b></div>
+                    <div class="d-flex justify-content-between small"><span>Asientos</span><b id="textoAsientos">-</b></div>
+                    <hr />
+                    <div class="d-flex justify-content-between"><span>Total</span><b class="fs-5">USD @((tarifa * pasajeros).ToString("N2"))</b></div>
+                </div>
+                <div id="errorAsientos" class="text-danger small mt-2"></div>
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn btn-oro py-2">Continuar</button>
+                    <a class="btn btn-outline-secondary" href="@Url.Action("Disponibilidad", new { id = ViewBag.VueloId, itinerarioId = ViewBag.ItinerarioId, pasajeros = pasajeros })">Regresar</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        var maximo = @pasajeros;
+
+        function mostrarSeleccion() {
+            var codigos = $(".asiento-check:checked").map(function () { return $(this).data("codigo"); }).get();
+            $("#textoAsientos").text(codigos.length > 0 ? codigos.join(", ") : "-");
+        }
+
+        $(".asiento-check").on("change", function () {
+            if ($(".asiento-check:checked").length > maximo) {
+                $(this).prop("checked", false);
+                $("#errorAsientos").text("Solo puede elegir " + maximo + " asiento(s).");
+            } else {
+                $("#errorAsientos").text("");
+            }
+            mostrarSeleccion();
+        });
+
+        $("#formAsientos").on("submit", function (evento) {
+            if ($(".asiento-check:checked").length !== maximo) {
+                evento.preventDefault();
+                $("#errorAsientos").text("Debe elegir " + maximo + " asiento(s).");
+            }
+        });
+
+        mostrarSeleccion();
+    </script>
+}

@@ -1,0 +1,41 @@
+﻿<script>
+    function validarCedulaJS(cedula) {
+        if (!cedula || cedula.length !== 10 || isNaN(cedula)) {
+            return false;
+        }
+
+        var provincia = parseInt(cedula.substring(0, 2));
+        if ((provincia < 1 || provincia > 24) && provincia !== 30) {
+            return false;
+        }
+
+        if (parseInt(cedula[2]) > 5) {
+            return false;
+        }
+
+        var sum = 0;
+        for (var i = 0; i < 9; i++) {
+            var digit = parseInt(cedula[i]);
+
+            if (i % 2 === 0) {
+                var multiplied = digit * 2;
+                sum += (multiplied > 9) ? multiplied - 9 : multiplied;
+            } else {
+                sum += digit;
+            }
+        }
+
+        var lastDigit = parseInt(cedula[9]);
+        var modulo = sum % 10;
+
+        if ((modulo === 0 && lastDigit === 0) || (10 - modulo === lastDigit)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function mostrarMensaje(mensaje, campo, texto) {
+        $(mensaje).text(texto);
+        $(campo).toggleClass("input-validation-error", texto !== "");
+    }
+</script>

@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "Confirmar reserva";
+    var vuelos = (List<Progra_03.Models.Vuelo>)ViewBag.Vuelos;
+    var codigos = (List<string>)ViewBag.Codigos;
+    var pasajeros = (List<Progra_03.Models.Pasajero>)ViewBag.ListaPasajeros;
+    decimal tarifa = (decimal)ViewBag.Tarifa;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Revise y confirme su reserva</h1>
+        <p>Pantalla 10 · Verifique la información antes de confirmar.</p>
+        @Html.Partial("_Pasos", 4)
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    @using (Html.BeginForm("Confirmar", "Reservas", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="tabla mb-3">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Vuelo</th>
+                                <th>Ruta</th>
+                                <th>Salida</th>
+                                <th>Llegada</th>
+                                <th>Aeronave</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var vuelo in vuelos)
+                            {
+                                <tr>
+                                    <td><b>@vuelo.CodigoVuelo</b></td>
+                                    <td>@vuelo.Frecuencia.Ruta.DescripcionCompleta</td>
+                                    <td>@vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@vuelo.FechaHoraLlegada.ToString("HH:mm")</td>
+                                    <td>@(vuelo.Aeronave != null ? vuelo.Aeronave.Matricula : "")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tabla">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Pasajero</th>
+                                <th>Documento</th>
+                                <th>Asiento</th>
+                                <th>Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < pasajeros.Count; i++)
+                            {
+                                <tr>
+                                    <td>@pasajeros[i].NombreCompleto</td>
+                                    <td>@pasajeros[i].TipoDocumentoCodigo @pasajeros[i].NumeroDocumento</td>
+                                    <td><span class="estado e-verde">@codigos[i]</span></td>
+                                    <td class="text-nowrap">USD @tarifa.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tarjeta mt-3 small">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="aceptaCondiciones" value="true" id="aceptaCondiciones" />
+                        <label class="form-check-label" for="aceptaCondiciones">Confirmo que los datos de los pasajeros son correctos y acepto las condiciones de transporte.</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="resumen">
+                    <div class="dorado">TOTAL A PAGAR</div>
+                    <div class="fs-2 fw-bold mt-1">USD @(((decimal)ViewBag.Total).ToString("N2"))</div>
+                    <div class="small text-white-50 mt-2">Al confirmar, la reserva queda <b class="text-white">PENDIENTE</b> y los asientos se apartan (morado) durante @Progra_03.Models.Reserva.MinutosParaPagar minutos. Si no paga en ese tiempo, los asientos se liberan.</div>
+                </div>
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn btn-oro py-2">Confirmar reserva</button>
+                    <a class="btn btn-outline-secondary" href="@Url.Action("Pasajeros")">Volver</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

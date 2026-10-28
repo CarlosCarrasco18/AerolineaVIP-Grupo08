@@ -1,0 +1,64 @@
+﻿@model IEnumerable<Progra_03.Models.ModeloAeronave>
+
+@{
+    ViewBag.Title = "Aeronaves";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Aeronaves</h1>
+        <p>Pantalla 19 · Flota de aeronaves con capacidad máxima de 7 asientos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasAeronaves", "Modelos")
+
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <span class="text-muted small">@Html.ActionLink("← Administración", "Index", "Admin") · @Model.Count() registro(s)</span>
+        @if (User.IsInRole("create"))
+        {
+            @Html.ActionLink("+ Crear nuevo", "Create", null, new { @class = "btn btn-oro btn-sm" })
+        }
+    </div>
+
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Fabricante</th>
+                    <th>Modelo</th>
+                    <th>Capacidad</th>
+                    <th>Asientos configurados</th>
+                    <th>Aeronaves</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Fabricante</td>
+                        <td><b>@item.Nombre</b></td>
+                        <td>@item.CapacidadAsientos</td>
+                        <td>@item.Asientoes.Count</td>
+                        <td>@item.Aeronaves.Count</td>
+                        <td class="text-end">
+                            <span class="acc">
+                                @Html.ActionLink("Detalles", "Details", new { id = item.ModeloAeronaveId })
+                                @if (User.IsInRole("edit"))
+                                {
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.ModeloAeronaveId })
+                                }
+                                @if (User.IsInRole("delete"))
+                                {
+                                    @Html.ActionLink("Eliminar", "Delete", new { id = item.ModeloAeronaveId }, new { @class = "borrar" })
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

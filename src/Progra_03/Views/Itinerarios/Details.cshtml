@@ -1,0 +1,65 @@
+﻿@model Progra_03.Models.Itinerario
+
+@{
+    ViewBag.Title = "Detalle de itinerario";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Vuelos e itinerarios</h1>
+        <p>Pantalla 18 · Administración de vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasVuelos", "Itinerarios")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                <h2>Detalle de itinerario</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Referencia</dt>
+                    <dd class="col-sm-8">@Model.Referencia</dd>
+                    <dt class="col-sm-4 text-muted">Nombre</dt>
+                    <dd class="col-sm-8">@Model.Nombre</dd>
+                    <dt class="col-sm-4 text-muted">Estado</dt>
+                    <dd class="col-sm-8"><span class="estado e-@(Model.EstadoItinerarioCodigo)">@Model.EstadoItinerarioCodigo</span></dd>
+                    <dt class="col-sm-4 text-muted">Tramos</dt>
+                    <dd class="col-sm-8">@Model.TramoItinerarios.Count</dd>
+                </dl>
+            </div>
+
+            <div class="tarjeta mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h2 class="mb-0">Tramos</h2>
+                    @if (User.IsInRole("create"))
+                    {
+                        @Html.ActionLink("+ Agregar tramo", "Create", "TramoItinerarios", new { itinerarioId = Model.ItinerarioId }, new { @class = "btn btn-oro btn-sm" })
+                    }
+                </div>
+                <table class="table table-sm mb-0">
+                    <tr><th>Orden</th><th>Vuelo</th><th>Ruta</th><th>Salida</th><th>Llegada</th></tr>
+                    @foreach (var tramo in Model.TramoItinerarios.OrderBy(t => t.Orden))
+                    {
+                        <tr>
+                            <td>@tramo.Orden</td>
+                            <td>@tramo.Vuelo.CodigoVuelo</td>
+                            <td>@tramo.Vuelo.Frecuencia.Ruta.Descripcion</td>
+                            <td>@tramo.Vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@tramo.Vuelo.FechaHoraLlegada.ToString("HH:mm")</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                @if (User.IsInRole("edit"))
+                {
+                    @Html.ActionLink("Editar", "Edit", new { id = Model.ItinerarioId }, new { @class = "btn btn-oro" })
+                }
+                @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+            </div>
+        </div>
+    </div>
+</div>

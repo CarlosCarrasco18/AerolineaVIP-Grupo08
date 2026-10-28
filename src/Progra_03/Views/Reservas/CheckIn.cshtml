@@ -1,0 +1,119 @@
+﻿@model Progra_03.Models.Reserva
+
+@{
+    ViewBag.Title = "Check-in";
+    var asignaciones = (List<Progra_03.Models.ReservaPasajeroVuelo>)ViewBag.Asignaciones;
+    var tarjeta = ViewBag.Tarjeta as Progra_03.Models.ReservaPasajeroVuelo;
+}
+
+<div class="encabezado no-imprimir">
+    <div class="container">
+        <h1>Check-in · @Model.CodigoReserva</h1>
+        <p>Pantalla 15 · Registre a cada pasajero; al completar se muestra su tarjeta de embarque.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="no-imprimir">
+        @Html.Partial("_Mensaje")
+        <div class="alert alert-info small">El check-in se habilita @Progra_03.Models.Vuelo.HorasCheckIn horas antes de la salida y solo para asientos confirmados (pagados).</div>
+
+        <div class="tabla">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Pasajero</th>
+                        <th>Vuelo</th>
+                        <th>Salida</th>
+                        <th>Asiento</th>
+                        <th>Check-in</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var asignacion in asignaciones)
+                    {
+                        <tr>
+                            <td>@asignacion.Pasajero.NombreCompleto</td>
+                            <td>@asignacion.Vuelo.CodigoVuelo · @asignacion.Vuelo.Frecuencia.Ruta.Descripcion</td>
+                            <td>@asignacion.Vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@asignacion.CodigoAsiento</td>
+                            <td>
+                                @if (asignacion.TieneCheckIn())
+                                {
+                                    <span class="estado e-verde">COMPLETADO</span>
+                                }
+                                else if (asignacion.EstadoAsignacionCodigo != "CONFIRMADA")
+                                {
+                                    <span class="estado e-rojo">@asignacion.EstadoAsignacionCodigo</span>
+                                }
+                                else if (asignacion.Vuelo.CheckInAbierto())
+                                {
+                                    <span class="estado e-amarillo">ABIERTO</span>
+                                }
+                                else
+                                {
+                                    <span class="estado">Desde @asignacion.Vuelo.FechaHoraSalida.AddHours(-Progra_03.Models.Vuelo.HorasCheckIn).ToString("dd/MM HH:mm")</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (asignacion.TieneCheckIn())
+                                {
+                                    <span class="acc">@Html.ActionLink("Ver tarjeta", "CheckIn", new { id = Model.ReservaId, asignacionId = asignacion.AsignacionId })</span>
+                                }
+                                else if (asignacion.EstadoAsignacionCodigo == "CONFIRMADA" && asignacion.Vuelo.CheckInAbierto())
+                                {
+                                    using (Html.BeginForm("RealizarCheckIn", "Reservas", new { asignacionId = asignacion.AsignacionId }, FormMethod.Post))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-oro">Hacer check-in</button>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-3">
+            @if (User.IsInRole("view"))
+            {
+                @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+            }
+            else
+            {
+                @Html.ActionLink("Volver a mis reservas", "MisReservas", null, new { @class = "btn btn-outline-secondary" })
+            }
+        </div>
+    </div>
+
+    @if (tarjeta != null)
+    {
+        <div class="tarjeta pase mt-4">
+            <div class="d-flex justify-content-between">
+                <b class="dorado">AEROLÍNEA VIP</b>
+                <b style="color:#12233f">TARJETA DE EMBARQUE</b>
+            </div>
+            <div class="row text-center my-3">
+                <div class="col">
+                    <div class="fs-2 fw-bold" style="color:#12233f">@tarjeta.Vuelo.Frecuencia.Ruta.Aeropuerto1.CodigoIATA</div>
+                    <small class="text-muted">@tarjeta.Vuelo.Frecuencia.Ruta.Aeropuerto1.Localidad</small>
+                </div>
+                <div class="col pt-3">@tarjeta.Vuelo.CodigoVuelo &#9992;</div>
+                <div class="col">
+                    <div class="fs-2 fw-bold" style="color:#12233f">@tarjeta.Vuelo.Frecuencia.Ruta.Aeropuerto.CodigoIATA</div>
+                    <small class="text-muted">@tarjeta.Vuelo.Frecuencia.Ruta.Aeropuerto.Localidad</small>
+                </div>
+            </div>
+            <div class="row small">
+                <div class="col">Pasajero<br /><b>@tarjeta.Pasajero.Apellidos.ToUpper(), @tarjeta.Pasajero.Nombres.ToUpper()</b></div>
+                <div class="col">Fecha<br /><b>@tarjeta.Vuelo.FechaOperacion.ToString("dd/MM/yyyy")</b></div>
+                <div class="col">Salida<br /><b>@tarjeta.Vuelo.Frecuencia.HoraSalida.ToString(@"hh\:mm")</b></div>
+                <div class="col">Asiento<br /><b class="fs-5">@tarjeta.CodigoAsiento</b></div>
+                <div class="col">Reserva<br /><b>@Model.CodigoReserva</b></div>
+                <div class="col text-end no-imprimir"><button type="button" class="btn btn-sm btn-azul mt-2" onclick="window.print()">Imprimir</button></div>
+            </div>
+        </div>
+    }
+</div>

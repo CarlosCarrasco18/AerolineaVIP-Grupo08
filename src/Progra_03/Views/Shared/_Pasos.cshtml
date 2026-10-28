@@ -1,0 +1,21 @@
+﻿@model int
+
+@{
+    string[] pasos = { "Vuelo", "Disponibilidad", "Asientos", "Pasajeros", "Reserva", "Pago" };
+}
+
+<div class="pasos">
+    @for (int i = 0; i < pasos.Length; i++)
+    {
+        string clase = "";
+        if (i < Model)
+        {
+            clase = "hecho";
+        }
+        else if (i == Model)
+        {
+            clase = "actual";
+        }
+        <span class="@clase">@(i + 1). @pasos[i]</span>
+    }
+</div>

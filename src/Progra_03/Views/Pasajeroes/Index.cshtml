@@ -1,0 +1,77 @@
+﻿@model IEnumerable<Progra_03.Models.Pasajero>
+
+@{
+    ViewBag.Title = "Usuarios, pasajeros y reservas";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Consulta y administración de usuarios, pasajeros y reservas.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Pasajeros")
+
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <span class="text-muted small">@Html.ActionLink("← Administración", "Index", "Admin") · @Model.Count() registro(s)</span>
+        @if (User.IsInRole("create"))
+        {
+            @Html.ActionLink("+ Crear nuevo", "Create", null, new { @class = "btn btn-oro btn-sm" })
+        }
+    </div>
+
+    @using (Html.BeginForm("Index", null, FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
+    {
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label">Documento, nombres o apellidos</label>
+                <input type="text" name="buscar" value="@ViewBag.Buscar" class="form-control" />
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-azul w-100">Buscar</button>
+            </div>
+        </div>
+    }
+
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Documento</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Correo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.TipoDocumentoCodigo</td>
+                        <td><b>@item.NumeroDocumento</b></td>
+                        <td>@item.Nombres</td>
+                        <td>@item.Apellidos</td>
+                        <td>@item.Correo</td>
+                        <td class="text-end">
+                            <span class="acc">
+                                @Html.ActionLink("Detalles", "Details", new { id = item.PasajeroId })
+                                @if (User.IsInRole("edit"))
+                                {
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.PasajeroId })
+                                }
+                                @if (User.IsInRole("delete"))
+                                {
+                                    @Html.ActionLink("Eliminar", "Delete", new { id = item.PasajeroId }, new { @class = "borrar" })
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

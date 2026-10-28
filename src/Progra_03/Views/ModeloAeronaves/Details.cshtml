@@ -1,0 +1,44 @@
+﻿@model Progra_03.Models.ModeloAeronave
+
+@{
+    ViewBag.Title = "Detalle de modelo de aeronave";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Aeronaves</h1>
+        <p>Pantalla 19 · Flota de aeronaves con capacidad máxima de 7 asientos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasAeronaves", "Modelos")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                <h2>Detalle de modelo de aeronave</h2>
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Fabricante</dt>
+                    <dd class="col-sm-8">@Model.Fabricante</dd>
+                    <dt class="col-sm-4 text-muted">Modelo</dt>
+                    <dd class="col-sm-8">@Model.Nombre</dd>
+                    <dt class="col-sm-4 text-muted">Capacidad</dt>
+                    <dd class="col-sm-8">@Model.CapacidadAsientos asientos</dd>
+                    <dt class="col-sm-4 text-muted">Asientos configurados</dt>
+                    <dd class="col-sm-8">@string.Join(", ", Model.Asientoes.OrderBy(a => a.NumeroAsiento).Select(a => a.Codigo))</dd>
+                    <dt class="col-sm-4 text-muted">Aeronaves</dt>
+                    <dd class="col-sm-8">@Model.Aeronaves.Count</dd>
+                </dl>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                @if (User.IsInRole("edit"))
+                {
+                    @Html.ActionLink("Editar", "Edit", new { id = Model.ModeloAeronaveId }, new { @class = "btn btn-oro" })
+                }
+                @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+            </div>
+        </div>
+    </div>
+</div>

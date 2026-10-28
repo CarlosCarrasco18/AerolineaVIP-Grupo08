@@ -1,0 +1,128 @@
+﻿@model IEnumerable<Progra_03.Models.Comprobante>
+
+@{
+    ViewBag.Title = "Comprobantes";
+    var seleccionado = ViewBag.Seleccionado as Progra_03.Models.Comprobante;
+    var emisor = ViewBag.Emisor as Progra_03.Models.DatosEmisor;
+    var pago = ViewBag.Pago as Progra_03.Models.Pago;
+}
+
+<div class="encabezado no-imprimir">
+    <div class="container">
+        <h1>Mis comprobantes</h1>
+        <p>Pantalla 16 · Documentos de sus compras.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4">
+        <div class="col-lg-5 no-imprimir">
+            @using (Html.BeginForm("Index", "Comprobantes", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
+            {
+                <div class="row g-2 align-items-end">
+                    <div class="col-8">
+                        <label class="form-label">Número o código de reserva</label>
+                        <input type="text" name="numero" value="@ViewBag.Numero" class="form-control" />
+                    </div>
+                    <div class="col-4">
+                        <button type="submit" class="btn btn-azul w-100">Buscar</button>
+                    </div>
+                </div>
+            }
+
+            <div class="tabla">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Reserva</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="@(seleccionado != null && item.ComprobanteId == seleccionado.ComprobanteId ? "table-active" : "")">
+                                <td><a href="@Url.Action("Index", new { numero = ViewBag.Numero, id = item.ComprobanteId })"><b>@item.NumeroComprobante</b></a></td>
+                                <td>@item.Compra.Reserva.CodigoReserva</td>
+                                <td>@item.FechaEmision.ToString("dd/MM/yyyy")</td>
+                                <td><span class="estado e-@item.EstadoComprobanteCodigo">@item.EstadoComprobanteCodigo</span></td>
+                            </tr>
+                        }
+                        @if (Model.Count() == 0)
+                        {
+                            <tr><td colspan="4" class="text-muted">No hay comprobantes.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                @if (ViewBag.Numero != "")
+                {
+                    @Html.ActionLink("Ver todos", "Index", null, new { @class = "btn btn-outline-dark" })
+                }
+                @Html.ActionLink("Volver a mis reservas", "MisReservas", "Reservas", null, new { @class = "btn btn-outline-secondary" })
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            @if (seleccionado != null)
+            {
+                string tipo = "Factura";
+                if (seleccionado.TipoComprobanteCodigo == "CONFIRMACION")
+                {
+                    tipo = "Confirmación de la operación";
+                }
+                else if (seleccionado.TipoComprobanteCodigo == "NOTA_CREDITO")
+                {
+                    tipo = "Nota de crédito";
+                }
+
+                <div class="tarjeta">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <b class="dorado">@(emisor != null ? emisor.NombreVisible.ToUpper() : "AEROLÍNEA VIP")</b>
+                            <div class="small text-muted">Quito, Ecuador</div>
+                        </div>
+                        <div class="text-end">
+                            <b>@tipo.ToUpper()</b>
+                            <div class="small">N.º @seleccionado.NumeroComprobante</div>
+                            <div class="small text-muted">@seleccionado.FechaEmision.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="small mb-2">Cliente: <b>@ViewBag.Cliente</b> · Reserva @seleccionado.Compra.Reserva.CodigoReserva · <span class="estado e-@seleccionado.EstadoComprobanteCodigo">@seleccionado.EstadoComprobanteCodigo</span></div>
+                    <table class="table table-sm small">
+                        <tr>
+                            <th>Descripción</th>
+                            <th class="text-end">Importe</th>
+                        </tr>
+                        @foreach (var asignacion in seleccionado.Compra.Reserva.ReservaPasajeroVueloes.OrderBy(a => a.Vuelo.FechaOperacion))
+                        {
+                            <tr>
+                                <td>@asignacion.Vuelo.Frecuencia.Ruta.Descripcion @asignacion.Vuelo.FechaHoraSalida.ToString("dd/MM HH:mm") · Asiento @asignacion.CodigoAsiento · @asignacion.Pasajero.NombreCompleto</td>
+                                <td class="text-end">@asignacion.ImporteTramo.ToString("N2")</td>
+                            </tr>
+                        }
+                        <tr>
+                            <th>Total @seleccionado.Compra.MonedaCodigo</th>
+                            <th class="text-end">@seleccionado.Compra.Importe.ToString("N2")</th>
+                        </tr>
+                    </table>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small text-muted">
+                            @if (pago != null)
+                            {
+                                <span>@pago.MarcaTarjetaCodigo **** @pago.UltimosCuatroDigitos ·</span> <span class="estado e-@pago.EstadoPagoCodigo">@pago.EstadoPagoCodigo</span>
+                            }
+                        </span>
+                        <button type="button" class="btn btn-sm btn-azul no-imprimir" onclick="window.print()">Imprimir</button>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">Gracias por volar con Aerolínea VIP.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

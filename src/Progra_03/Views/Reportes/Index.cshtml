@@ -1,0 +1,93 @@
+﻿@model IEnumerable<Progra_03.Models.Vuelo>
+
+@{
+    ViewBag.Title = "Reportes";
+    DateTime desde = (DateTime)ViewBag.Desde;
+    DateTime hasta = (DateTime)ViewBag.Hasta;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Consultas y reportes</h1>
+        <p>Pantalla 21 · Ocupación y ventas de los vuelos según los filtros.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="mb-3 small">@Html.ActionLink("← Administración", "Index", "Admin")</div>
+
+    @Html.Partial("_Mensaje")
+
+    @using (Html.BeginForm("Index", "Reportes", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
+    {
+        <div class="row g-2 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label">Desde</label>
+                <input type="date" name="desde" value="@desde.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Hasta</label>
+                <input type="date" name="hasta" value="@hasta.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Ruta</label>
+                @Html.DropDownList("rutaId", null, "Todas", new { @class = "form-select" })
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Aeronave</label>
+                @Html.DropDownList("aeronaveId", null, "Todas", new { @class = "form-select" })
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-azul w-100">Consultar</button>
+            </div>
+        </div>
+    }
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Vuelos</small><div>@Model.Count()</div></div></div>
+        <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Asientos ocupados</small><div>@Model.Sum(v => v.CalcularAsientosOcupados())</div></div></div>
+        <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Asientos libres</small><div>@Model.Sum(v => v.CalcularAsientosLibres())</div></div></div>
+        <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Ventas</small><div>USD @Model.Sum(v => v.CalcularVentas()).ToString("N2")</div></div></div>
+    </div>
+
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Vuelo</th>
+                    <th>Ruta</th>
+                    <th>Aeronave</th>
+                    <th>Estado</th>
+                    <th>Ocupados</th>
+                    <th>Reservados</th>
+                    <th>Libres</th>
+                    <th>Ventas</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><b>@item.CodigoVuelo</b></td>
+                        <td>@item.Frecuencia.Ruta.Descripcion</td>
+                        <td>@(item.Aeronave != null ? item.Aeronave.Matricula : "Sin asignar")</td>
+                        <td><span class="estado e-@item.EstadoVueloCodigo">@item.EstadoVueloCodigo</span></td>
+                        <td>@item.CalcularAsientosOcupados()</td>
+                        <td>@item.CalcularAsientosReservados()</td>
+                        <td>@item.CalcularAsientosLibres()</td>
+                        <td class="text-nowrap">USD @item.CalcularVentas().ToString("N2")</td>
+                    </tr>
+                }
+                <tr class="fw-bold">
+                    <td colspan="5">Total</td>
+                    <td>@Model.Sum(v => v.CalcularAsientosOcupados())</td>
+                    <td>@Model.Sum(v => v.CalcularAsientosReservados())</td>
+                    <td>@Model.Sum(v => v.CalcularAsientosLibres())</td>
+                    <td class="text-nowrap">USD @Model.Sum(v => v.CalcularVentas()).ToString("N2")</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Aerolínea VIP</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+</head>
+<body class="d-flex flex-column min-vh-100">
+    @{
+        var controlador = ViewContext.RouteData.Values["controller"].ToString();
+        var accion = ViewContext.RouteData.Values["action"].ToString();
+        bool administra = User.IsInRole("view") || User.IsInRole("create") || User.IsInRole("edit") || User.IsInRole("delete");
+        bool compra = accion == "Disponibilidad" || accion == "SeleccionAsiento" || accion == "Pasajeros" || accion == "Confirmar" || accion == "Pagar";
+        bool misReservas = !compra && (controlador == "Reservas" && (accion == "MisReservas" || accion == "Gestionar" || accion == "Cancelar" || accion == "CheckIn" || accion == "RealizarCheckIn") || controlador == "Compras");
+    }
+    <nav class="nav-vip">
+        <div class="container d-flex align-items-center flex-wrap gap-2">
+            <a class="marca" href="@Url.Action("Index", "Home")"><span>&#9992;</span>AEROLÍNEA VIP</a>
+            <div class="d-flex ms-lg-4 gap-1 flex-wrap">
+                <a class="nav-link @(controlador == "Home" && accion == "Index" ? "activo" : "")" href="@Url.Action("Index", "Home")">Inicio</a>
+                <a class="nav-link @((controlador == "Home" && accion != "Index") || compra ? "activo" : "")" href="@Url.Action("Buscar", "Home")">Vuelos</a>
+                @if (User.IsInRole("Cliente") || User.IsInRole("Pasajero"))
+                {
+                    <a class="nav-link @(misReservas ? "activo" : "")" href="@Url.Action("MisReservas", "Reservas")">Mis reservas</a>
+                }
+                @if (User.IsInRole("Cliente"))
+                {
+                    <a class="nav-link @(controlador == "Comprobantes" ? "activo" : "")" href="@Url.Action("Index", "Comprobantes")">Comprobantes</a>
+                }
+                @if (administra)
+                {
+                    <a class="nav-link @(controlador != "Home" && controlador != "Account" && controlador != "Manage" && controlador != "Comprobantes" && !compra && !misReservas ? "activo" : "")" href="@Url.Action("Index", "Admin")">Administración</a>
+                }
+            </div>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                @Html.Partial("_LoginPartial")
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <footer>
+        <div class="container d-flex justify-content-between flex-wrap gap-2">
+            <span>&copy; @DateTime.Now.Year Aerolínea VIP · Quito · Guayaquil · Manta · Galápagos</span>
+            <span>Grupo 8</span>
+        </div>
+    </footer>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

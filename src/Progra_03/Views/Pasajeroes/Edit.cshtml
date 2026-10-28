@@ -1,0 +1,141 @@
+﻿@model Progra_03.Models.Pasajero
+
+@{
+    ViewBag.Title = "Editar pasajero";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Consulta y administración de usuarios, pasajeros y reservas.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Pasajeros")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            @Html.Partial("_Mensaje")
+
+            @using (Html.BeginForm())
+            {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.PasajeroId)
+            @Html.HiddenFor(model => model.FechaRegistro)
+
+            <div class="tarjeta">
+                <h2>Editar pasajero</h2>
+                <div class="row g-3">
+                @try
+                {
+                    <div class="col-md-6">
+                        @Html.LabelFor(model => model.TipoDocumentoCodigo, htmlAttributes: new { @class = "form-label" })
+                        @Html.DropDownList("TipoDocumentoCodigo", null, "Seleccione...", htmlAttributes: new { @class = "form-select" })
+                        @Html.ValidationMessageFor(model => model.TipoDocumentoCodigo, "Seleccione el tipo de documento", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en TipoDocumentoCodigo: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-6">
+                        @Html.LabelFor(model => model.NumeroDocumento, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.NumeroDocumento, new { htmlAttributes = new { @class = "form-control", maxlength = "20", oninput = "this.value=this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()" } })
+                        @Html.ValidationMessageFor(model => model.NumeroDocumento, "Ingrese un número de documento válido", new { @class = "text-info" })
+                        <div id="mensajeDocumento" class="text-danger small"></div>
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en NumeroDocumento: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-6">
+                        @Html.LabelFor(model => model.Nombres, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.Nombres, new { htmlAttributes = new { @class = "form-control", maxlength = "100", oninput = "this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]/g, '')" } })
+                        @Html.ValidationMessageFor(model => model.Nombres, "Ingrese nombres válidos (solo letras)", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en Nombres: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-6">
+                        @Html.LabelFor(model => model.Apellidos, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.Apellidos, new { htmlAttributes = new { @class = "form-control", maxlength = "100", oninput = "this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]/g, '')" } })
+                        @Html.ValidationMessageFor(model => model.Apellidos, "Ingrese apellidos válidos (solo letras)", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en Apellidos: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.FechaNacimiento, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.FechaNacimiento, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.FechaNacimiento, "Ingrese una fecha de nacimiento válida", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en FechaNacimiento: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.Correo, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.Correo, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Correo, "Ingrese un correo válido", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en Correo: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.Telefono, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.Telefono, new { htmlAttributes = new { @class = "form-control", maxlength = "20", oninput = "this.value=this.value.replace(/[^0-9+ ]/g, '')" } })
+                        @Html.ValidationMessageFor(model => model.Telefono, "Ingrese un teléfono válido", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en Telefono: @ex.Message</div>
+                }
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-oro px-4">Guardar</button>
+                    @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_ScriptsValidacion")
+    @Html.Partial("_ValidarCedula")
+    <script>
+        $("#NumeroDocumento").on("blur", function () {
+            var tipo = $("#TipoDocumentoCodigo").val();
+            var valor = $(this).val().trim();
+            var mensaje = "";
+            if (valor !== "" && tipo === "CEDULA" && !validarCedulaJS(valor)) {
+                mensaje = "La cédula ingresada no es válida.";
+            }
+            mostrarMensaje("#mensajeDocumento", this, mensaje);
+        });
+    </script>
+}

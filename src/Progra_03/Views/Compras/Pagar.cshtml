@@ -1,0 +1,162 @@
+﻿@model Progra_03.Models.PagoViewModel
+
+@{
+    ViewBag.Title = "Pago";
+    var reserva = (Progra_03.Models.Reserva)ViewBag.Reserva;
+    var marcas = (List<Progra_03.Models.MarcaTarjeta>)ViewBag.Marcas;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Pago</h1>
+        <p>Pantalla 11 · Complete los datos de su tarjeta.</p>
+        @Html.Partial("_Pasos", 5)
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            @if (ViewBag.Message == null)
+            {
+                <div class="alert alert-success small">Reserva <b>@reserva.CodigoReserva</b> registrada. Complete el pago antes de las @(reserva.FechaExpiracion != null ? reserva.FechaExpiracion.Value.ToString("HH:mm") : "") para confirmarla.</div>
+
+                using (Html.BeginForm("Pagar", "Compras", FormMethod.Post, new { id = "formPago", autocomplete = "off" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.ReservaId)
+
+                    <div class="tarjeta">
+                        <h2>Datos de la tarjeta</h2>
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <div class="row g-3">
+                            @try
+                            {
+                                <div class="col-md-6">
+                                    @Html.LabelFor(model => model.MetodoPagoCodigo, htmlAttributes: new { @class = "form-label" })
+                                    @Html.DropDownList("MetodoPagoCodigo", null, "Seleccione...", new { @class = "form-select" })
+                                    @Html.ValidationMessageFor(model => model.MetodoPagoCodigo, "Seleccione el método de pago", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en MetodoPagoCodigo: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-6">
+                                    @Html.LabelFor(model => model.MarcaTarjetaCodigo, htmlAttributes: new { @class = "form-label" })
+                                    @Html.DropDownList("MarcaTarjetaCodigo", null, "Seleccione...", new { @class = "form-select" })
+                                    @Html.ValidationMessageFor(model => model.MarcaTarjetaCodigo, "Seleccione la marca de la tarjeta", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en MarcaTarjetaCodigo: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-12">
+                                    @Html.LabelFor(model => model.NumeroTarjeta, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(model => model.NumeroTarjeta, new { htmlAttributes = new { @class = "form-control", inputmode = "numeric", maxlength = "19", placeholder = "Solo números" } })
+                                    @Html.ValidationMessageFor(model => model.NumeroTarjeta, "Ingrese un número de tarjeta válido", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en NumeroTarjeta: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-12">
+                                    @Html.LabelFor(model => model.NombreTitular, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(model => model.NombreTitular, new { htmlAttributes = new { @class = "form-control", placeholder = "Como aparece en la tarjeta" } })
+                                    @Html.ValidationMessageFor(model => model.NombreTitular, "Ingrese el nombre del titular (solo letras)", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en NombreTitular: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-6">
+                                    @Html.LabelFor(model => model.Vencimiento, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(model => model.Vencimiento, new { htmlAttributes = new { @class = "form-control", inputmode = "numeric", maxlength = "5", placeholder = "MM/AA" } })
+                                    @Html.ValidationMessageFor(model => model.Vencimiento, "Ingrese una fecha de vencimiento válida (MM/AA)", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en Vencimiento: @ex.Message</div>
+                            }
+                            @try
+                            {
+                                <div class="col-md-6">
+                                    @Html.LabelFor(model => model.CodigoSeguridad, htmlAttributes: new { @class = "form-label" })
+                                    @Html.EditorFor(model => model.CodigoSeguridad, new { htmlAttributes = new { @class = "form-control", inputmode = "numeric", maxlength = "4" } })
+                                    @Html.ValidationMessageFor(model => model.CodigoSeguridad, "Ingrese un CVV válido", new { @class = "text-info" })
+                                </div>
+                            }
+                            catch (Exception ex)
+                            {
+                                <div class="col-12 text-danger">Error en CodigoSeguridad: @ex.Message</div>
+                            }
+                            <div class="col-12 d-grid">
+                                <button type="submit" class="btn btn-oro py-2">Pagar USD @reserva.CalcularTotal().ToString("N2")</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <a class="btn btn-outline-secondary" href="@Url.Action("MisReservas", "Reservas")">Ir a mis reservas</a>
+            }
+        </div>
+        <div class="col-lg-5">
+            <div class="resumen">
+                <div class="dorado">RESUMEN DE COMPRA</div>
+                <div class="small mt-2">Reserva <b>@reserva.CodigoReserva</b></div>
+                <div class="small">@reserva.DescripcionVuelos()</div>
+                <div class="small">@reserva.CalcularPasajeros() pasajero(s)</div>
+                <hr />
+                <div class="d-flex justify-content-between"><span>Total</span><b class="fs-4">USD @reserva.CalcularTotal().ToString("N2")</b></div>
+            </div>
+            <a class="btn btn-outline-secondary w-100 mt-3" href="@Url.Action("MisReservas", "Reservas")">Pagar después (volver a mis reservas)</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_ScriptsValidacion")
+    <script>
+        var longitudes = {};
+        @foreach (var marca in marcas)
+        {
+            @:longitudes["@marca.Codigo"] = { numero: @marca.LongitudNumero, cvv: @marca.LongitudCodigoSeguridad };
+        }
+
+        $("#NumeroTarjeta, #CodigoSeguridad").on("input", function () {
+            this.value = this.value.replace(/\D/g, "");
+        });
+
+        $("#Vencimiento").on("input", function () {
+            var valor = this.value.replace(/\D/g, "").slice(0, 4);
+            if (valor.length > 2) {
+                valor = valor.slice(0, 2) + "/" + valor.slice(2);
+            }
+            this.value = valor;
+        });
+
+        $("#MarcaTarjetaCodigo").on("change", function () {
+            var marca = longitudes[$(this).val()];
+            if (marca) {
+                $("#NumeroTarjeta").attr("maxlength", marca.numero);
+                $("#CodigoSeguridad").attr("maxlength", marca.cvv);
+            }
+        });
+    </script>
+}

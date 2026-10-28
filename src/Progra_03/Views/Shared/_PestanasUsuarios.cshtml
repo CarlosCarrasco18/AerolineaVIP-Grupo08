@@ -1,0 +1,7 @@
+﻿@model string
+
+<div class="pestanas mb-2">
+    <a class="@(Model == "Usuarios" ? "activo" : "")" href="@Url.Action("Index", "Usuarios")">Usuarios</a>
+    <a class="@(Model == "Pasajeros" ? "activo" : "")" href="@Url.Action("Index", "Pasajeroes")">Pasajeros</a>
+    <a class="@(Model == "Reservas" ? "activo" : "")" href="@Url.Action("Index", "Reservas")">Reservas</a>
+</div>

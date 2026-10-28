@@ -1,0 +1,46 @@
+﻿@using Microsoft.AspNet.Identity
+@model Progra_03.Models.IndexViewModel
+
+@{
+    ViewBag.Title = "Mi cuenta";
+    var roles = (IList<string>)ViewBag.Roles;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Mi cuenta</h1>
+        <p>Datos de su cuenta de usuario.</p>
+    </div>
+</div>
+
+<div class="container">
+    @if (!string.IsNullOrEmpty(ViewBag.StatusMessage))
+    {
+        <div class="alert alert-success small">@ViewBag.StatusMessage</div>
+    }
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="tarjeta">
+                <h2>Datos de la cuenta</h2>
+                <dl class="row">
+                    <dt class="col-sm-5 text-muted">Nombre de usuario</dt>
+                    <dd class="col-sm-7">@User.Identity.GetUserName()</dd>
+                    <dt class="col-sm-5 text-muted">Correo electrónico</dt>
+                    <dd class="col-sm-7">@ViewBag.Email</dd>
+                    <dt class="col-sm-5 text-muted">Cédula</dt>
+                    <dd class="col-sm-7">@Model.PhoneNumber</dd>
+                    <dt class="col-sm-5 text-muted">Roles</dt>
+                    <dd class="col-sm-7">@string.Join(", ", roles)</dd>
+                </dl>
+                @if (Model.HasPassword)
+                {
+                    <a href="@Url.Action("ChangePassword")" class="btn btn-oro">Cambiar contraseña</a>
+                }
+                else
+                {
+                    <a href="@Url.Action("SetPassword")" class="btn btn-oro">Crear contraseña</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

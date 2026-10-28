@@ -1,0 +1,68 @@
+﻿@model IEnumerable<Progra_03.Models.ReservaPasajeroVuelo>
+
+@{
+    ViewBag.Title = "Mis reservas";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Mis reservas</h1>
+        <p>Pantalla 13 · Viajes en los que aparece su cédula @ViewBag.Cedula.</p>
+    </div>
+</div>
+
+<div class="container">
+    @using (Html.BeginForm("MisReservas", "Reservas", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
+    {
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label">Estado de la reserva</label>
+                @Html.DropDownList("estado", null, "Todos", new { @class = "form-select" })
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-azul w-100">Filtrar</button>
+            </div>
+        </div>
+    }
+
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Reserva</th>
+                    <th>Pasajero</th>
+                    <th>Vuelo</th>
+                    <th>Salida</th>
+                    <th>Asiento</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><b>@item.Reserva.CodigoReserva</b></td>
+                        <td>@item.Pasajero.NombreCompleto</td>
+                        <td>@item.Vuelo.CodigoVuelo · @item.Vuelo.Frecuencia.Ruta.Descripcion</td>
+                        <td>@item.Vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@item.CodigoAsiento</td>
+                        <td><span class="estado e-@item.Reserva.EstadoReservaCodigo">@item.Reserva.EstadoReservaCodigo</span></td>
+                        <td class="text-end">
+                            <span class="acc">
+                                @if (item.EstadoAsignacionCodigo == "CONFIRMADA")
+                                {
+                                    @Html.ActionLink("Check-in", "CheckIn", new { id = item.ReservaId })
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count() == 0)
+                {
+                    <tr><td colspan="7" class="text-muted">No hay viajes registrados con su cédula.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

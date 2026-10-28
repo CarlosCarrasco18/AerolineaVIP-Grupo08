@@ -1,0 +1,74 @@
+﻿@model IEnumerable<Progra_03.Models.Ruta>
+
+@{
+    ViewBag.Title = "Inicio";
+}
+
+<div class="hero">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <div class="dorado fw-bold small mb-2">VUELOS PRIVADOS EN ECUADOR</div>
+                <h1>Vuela exclusivo,<br />sin filas ni esperas</h1>
+                <p class="text-white-50 mt-3">Elige tu asiento, paga en línea y haz tu check-in desde casa.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="tarjeta text-dark">
+                    <h2>¿A dónde viajas?</h2>
+                    @using (Html.BeginForm("Buscar", "Home", FormMethod.Get))
+                    {
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Origen</label>
+                                @Html.DropDownList("origen", null, "Seleccione...", new { @class = "form-select", required = "required" })
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Destino</label>
+                                @Html.DropDownList("destino", null, "Seleccione...", new { @class = "form-select", required = "required" })
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Pasajeros</label>
+                                @Html.DropDownList("pasajeros", null, new { @class = "form-select" })
+                            </div>
+                            <div class="col-md-6 d-grid align-items-end">
+                                <button type="submit" class="btn btn-oro py-2">Ver fechas disponibles</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="tarjeta my-4 py-3">
+        <div class="row text-center">
+            <div class="col-6 col-md-3"><div class="fs-3 fw-bold dorado">7</div><div class="small text-muted">asientos por vuelo</div></div>
+            <div class="col-6 col-md-3"><div class="fs-3 fw-bold dorado">3</div><div class="small text-muted">Embraer Phenom 300E</div></div>
+            <div class="col-6 col-md-3"><div class="fs-3 fw-bold dorado">4</div><div class="small text-muted">destinos en Ecuador</div></div>
+            <div class="col-6 col-md-3"><div class="fs-3 fw-bold dorado">@Progra_03.Models.Vuelo.HorasCheckIn h</div><div class="small text-muted">check-in en línea</div></div>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mb-3" style="color:#12233f">Nuestras rutas</h4>
+    <div class="row g-3">
+        @foreach (var ruta in Model)
+        {
+            <div class="col-md-4">
+                <div class="tarjeta h-100">
+                    <div class="dorado small fw-bold">DESDE USD @ruta.TarifaReferencial.ToString("N2")</div>
+                    <h2 class="mt-1 mb-1">@ruta.DescripcionCompleta</h2>
+                    <p class="small text-muted mb-2">
+                        @string.Join(", ", ruta.Frecuencias.Where(f => f.Activa).Select(f => f.NombreDia).Distinct())
+                    </p>
+                    <a class="small dorado fw-bold text-decoration-none" href="@Url.Action("Resultados", new { origen = ruta.AeropuertoOrigenId, destino = ruta.AeropuertoDestinoId })">Ver vuelos →</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_FiltroDestinos", (List<Progra_03.Models.Ruta>)ViewBag.Rutas)
+}

@@ -1,0 +1,92 @@
+﻿@model Progra_03.Models.Aeropuerto
+
+@{
+    ViewBag.Title = "Editar aeropuerto";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Vuelos e itinerarios</h1>
+        <p>Pantalla 18 · Administración de vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasVuelos", "Aeropuertos")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            @Html.Partial("_Mensaje")
+
+            @using (Html.BeginForm())
+            {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            @Html.HiddenFor(model => model.AeropuertoId)
+
+            <div class="tarjeta">
+                <h2>Editar aeropuerto</h2>
+                <div class="row g-3">
+                @try
+                {
+                    <div class="col-md-4">
+                        @Html.LabelFor(model => model.CodigoIATA, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.CodigoIATA, new { htmlAttributes = new { @class = "form-control", maxlength = "3", oninput = "this.value=this.value.replace(/[^a-zA-Z]/g, '').toUpperCase()" } })
+                        @Html.ValidationMessageFor(model => model.CodigoIATA, "Ingrese un código IATA válido (3 letras)", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en CodigoIATA: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-8">
+                        @Html.LabelFor(model => model.Nombre, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.Nombre, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Nombre, "Ingrese un nombre válido", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en Nombre: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-6">
+                        @Html.LabelFor(model => model.Localidad, htmlAttributes: new { @class = "form-label" })
+                        @Html.EditorFor(model => model.Localidad, new { htmlAttributes = new { @class = "form-control", maxlength = "100", oninput = "this.value=this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ ]/g, '')" } })
+                        @Html.ValidationMessageFor(model => model.Localidad, "Ingrese una localidad válida", new { @class = "text-info" })
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en Localidad: @ex.Message</div>
+                }
+                @try
+                {
+                    <div class="col-md-6">
+                        <div class="form-check mt-md-4">
+                            @Html.CheckBoxFor(model => model.Activo, new { @class = "form-check-input" })
+                            @Html.LabelFor(model => model.Activo, htmlAttributes: new { @class = "form-check-label" })
+                        </div>
+                    </div>
+                }
+                catch (Exception ex)
+                {
+                    <div class="col-12 text-danger">Error en Activo: @ex.Message</div>
+                }
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-oro px-4">Guardar</button>
+                    @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_ScriptsValidacion")
+}
