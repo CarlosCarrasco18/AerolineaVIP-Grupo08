@@ -1,0 +1,54 @@
+﻿@model IEnumerable<Progra_03.Models.Aeronave>
+
+@{
+    ViewBag.Title = "Flota";
+    var proximos = (List<Progra_03.Models.Vuelo>)ViewBag.Proximos;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Aeronaves</h1>
+        <p>Pantalla 19 · Estado de la flota, capacidad y asignaciones de los próximos 7 días.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasAeronaves", "Flota")
+
+    @if ((int)ViewBag.SinAeronave > 0)
+    {
+        <div class="alert alert-warning small mt-3">Hay @ViewBag.SinAeronave vuelo(s) futuros sin aeronave asignada; no se pueden vender hasta asignarles una (RNP-01).</div>
+    }
+
+    <div class="row g-3 my-1">
+        @foreach (var aeronave in Model)
+        {
+            var asignados = proximos.Where(v => v.AeronaveId == aeronave.AeronaveId).ToList();
+            <div class="col-md-4">
+                <div class="tarjeta h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">@aeronave.Matricula</h2>
+                        <span class="estado e-@aeronave.EstadoAeronaveCodigo">@aeronave.EstadoAeronaveCodigo</span>
+                    </div>
+                    <p class="small text-muted mb-2">@aeronave.ModeloAeronave.NombreCompleto · @aeronave.ModeloAeronave.CapacidadAsientos asientos</p>
+                    <div class="small fw-bold mb-1">Próximos vuelos (@asignados.Count)</div>
+                    @foreach (var vuelo in asignados)
+                    {
+                        <div class="small">@vuelo.FechaHoraSalida.ToString("dd/MM HH:mm") · @vuelo.Frecuencia.Ruta.Descripcion · @vuelo.CalcularAsientosOcupados()/@vuelo.CalcularCapacidad() ocupados</div>
+                    }
+                    @if (asignados.Count == 0)
+                    {
+                        <div class="small text-muted">Sin vuelos asignados en los próximos 7 días.</div>
+                    }
+                    <div class="mt-3 acc small">
+                        @Html.ActionLink("Revisar asignaciones", "Details", "Aeronaves", new { id = aeronave.AeronaveId }, null)
+                        @if (User.IsInRole("edit"))
+                        {
+                            @Html.ActionLink("Modificar estado", "Edit", "Aeronaves", new { id = aeronave.AeronaveId }, null)
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

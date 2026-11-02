@@ -1,0 +1,148 @@
+﻿@{
+    ViewBag.Title = "Programación de vuelos";
+    DateTime desde = (DateTime)ViewBag.Desde;
+    DateTime hasta = (DateTime)ViewBag.Hasta;
+    var conflictos = (List<string>)ViewBag.Conflictos;
+    var vuelos = (List<Progra_03.Models.Vuelo>)ViewBag.Dias;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Vuelos e itinerarios</h1>
+        <p>Pantalla 18 · Generación de vuelos desde las frecuencias aprobadas, conflictos de aeronave y programación por fecha.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasVuelos", "Programacion")
+
+    @Html.Partial("_Mensaje")
+    @if (ViewBag.Exito != null)
+    {
+        <div class="alert alert-success small">@ViewBag.Exito</div>
+    }
+
+    <div class="row g-3 my-1">
+        @if (User.IsInRole("create"))
+        {
+            <div class="col-lg-5">
+                @using (Html.BeginForm("GenerarVuelos", "Admin", FormMethod.Post, new { @class = "tarjeta h-100", id = "formGenerar" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <h2>Generar vuelos</h2>
+                    <p class="small text-muted">Crea los vuelos de las frecuencias activas solo en sus días de operación. Asigna la aeronave del último vuelo de la misma frecuencia y arma el itinerario del día.</p>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label">Fecha desde</label>
+                            <input type="date" name="desde" id="genDesde" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Fecha hasta</label>
+                            <input type="date" name="hasta" id="genHasta" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                        </div>
+                    </div>
+                    <div id="errorGenerar" class="text-danger small mt-2 d-none"></div>
+                    <button type="submit" class="btn btn-oro w-100 mt-3">Generar vuelos</button>
+                }
+            </div>
+        }
+        <div class="col">
+            @using (Html.BeginForm("Vuelos", "Admin", FormMethod.Get, new { @class = "tarjeta h-100" }))
+            {
+                <h2>Consultar conflictos</h2>
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Desde</label>
+                        <input type="date" name="desde" value="@desde.ToString("yyyy-MM-dd")" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Hasta</label>
+                        <input type="date" name="hasta" value="@hasta.ToString("yyyy-MM-dd")" class="form-control" />
+                    </div>
+                    <div class="col">
+                        <button type="submit" class="btn btn-azul w-100">Consultar</button>
+                    </div>
+                </div>
+                if (conflictos.Count == 0)
+                {
+                    <div class="alert alert-success small mt-3 mb-0">No hay aeronaves con vuelos que se crucen en este rango.</div>
+                }
+                else
+                {
+                    <div class="alert alert-danger small mt-3 mb-0">
+                        @foreach (string conflicto in conflictos)
+                        {
+                            <div>@conflicto</div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <h6 class="fw-bold mt-3 mb-2">Programación del @desde.ToString("dd/MM/yyyy") al @hasta.ToString("dd/MM/yyyy")</h6>
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Vuelo</th>
+                    <th>Ruta</th>
+                    <th>Horario</th>
+                    <th>Aeronave</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in vuelos)
+                {
+                    <tr>
+                        <td>@item.Frecuencia.NombreDia @item.FechaOperacion.ToString("dd/MM/yyyy")</td>
+                        <td><b>@item.CodigoVuelo</b></td>
+                        <td>@item.Frecuencia.Ruta.Descripcion</td>
+                        <td>@item.Frecuencia.Horario</td>
+                        <td>@(item.Aeronave != null ? item.Aeronave.Matricula : "Sin asignar")</td>
+                        <td><span class="estado e-@item.EstadoVueloCodigo">@item.EstadoVueloCodigo</span></td>
+                        <td class="text-end">
+                            <span class="acc">
+                                @Html.ActionLink("Detalles", "Details", "Vueloes", new { id = item.VueloId }, null)
+                                @if (User.IsInRole("edit"))
+                                {
+                                    @Html.ActionLink("Editar", "Edit", "Vueloes", new { id = item.VueloId }, null)
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+                @if (vuelos.Count == 0)
+                {
+                    <tr><td colspan="7" class="text-muted">No hay vuelos programados en este rango.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $("#formGenerar").on("submit", function (evento) {
+            var desde = $("#genDesde").val();
+            var hasta = $("#genHasta").val();
+            var mensaje = "";
+
+            if (!desde || !hasta) {
+                mensaje = "Indique la fecha inicial y la fecha final.";
+            } else if (desde > hasta) {
+                mensaje = "La fecha inicial no puede ser mayor que la fecha final.";
+            } else if ((new Date(hasta) - new Date(desde)) / 86400000 > 365) {
+                mensaje = "El rango no puede superar 366 días.";
+            }
+
+            if (mensaje !== "") {
+                evento.preventDefault();
+                $("#errorGenerar").text(mensaje).removeClass("d-none");
+            }
+        });
+    </script>
+}

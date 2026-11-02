@@ -52,7 +52,7 @@
                             <span class="acc">
                                 @if (item.EstadoAsignacionCodigo == "CONFIRMADA")
                                 {
-                                    @Html.ActionLink("Check-in", "CheckIn", new { id = item.ReservaId })
+                                    @Html.ActionLink("Check-in", "Index", "CheckIn", new { id = item.ReservaId }, null)
                                 }
                             </span>
                         </td>

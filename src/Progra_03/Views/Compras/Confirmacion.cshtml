@@ -1,16 +1,21 @@
-﻿@model Progra_03.Models.Reserva
+﻿@using Microsoft.AspNet.Identity
+@model Progra_03.Models.Reserva
 
 @{
     ViewBag.Title = "Confirmación";
-    var compra = (Progra_03.Models.Compra)ViewBag.Compra;
+    var compra = ViewBag.Compra as Progra_03.Models.Compra;
     var pago = ViewBag.Pago as Progra_03.Models.Pago;
     var comprobante = ViewBag.Comprobante as Progra_03.Models.Comprobante;
+    var ultimoPago = ViewBag.UltimoPago as Progra_03.Models.Pago;
+    bool pagada = compra != null;
+    bool rechazado = !pagada && ultimoPago != null && ultimoPago.EstadoPagoCodigo == "RECHAZADO";
+    bool esTitular = Model.UsuarioId == User.Identity.GetUserId();
 }
 
 <div class="encabezado">
     <div class="container">
         <h1>Confirmación</h1>
-        <p>Pantalla 12 · Su operación se registró correctamente.</p>
+        <p>Pantalla 12 · Resultado de la operación: qué se completó y qué sigue pendiente.</p>
     </div>
 </div>
 
@@ -19,21 +24,63 @@
         <div class="col-lg-8">
             <div class="tarjeta">
                 <div class="text-center mb-3">
-                    <div class="mx-auto mb-2" style="width:56px;height:56px;border-radius:50%;background:#e3f2e8;color:#1e7b34;font-size:28px;line-height:56px">&#10003;</div>
-                    <h3 class="fw-bold" style="color:#12233f">¡Compra confirmada!</h3>
-                    <div class="small text-muted">Código de reserva</div>
+                    @if (pagada)
+                    {
+                        <div class="mx-auto mb-2" style="width:56px;height:56px;border-radius:50%;background:#e3f2e8;color:#1e7b34;font-size:28px;line-height:56px">&#10003;</div>
+                        <h3 class="fw-bold" style="color:#12233f">¡Compra confirmada!</h3>
+                        if (pago != null)
+                        {
+                            <div class="small text-muted">Pago simulado aprobado · Operación @pago.CodigoOperacion</div>
+                        }
+                    }
+                    else if (rechazado && Model.EstadoReservaCodigo == "PENDIENTE")
+                    {
+                        <div class="mx-auto mb-2" style="width:56px;height:56px;border-radius:50%;background:#fde4e4;color:#b42318;font-size:28px;line-height:56px">&#10007;</div>
+                        <h3 class="fw-bold" style="color:#12233f">Pago rechazado</h3>
+                        <div class="small text-muted">@ultimoPago.MensajeResultado La reserva sigue pendiente hasta las @(Model.FechaExpiracion != null ? Model.FechaExpiracion.Value.ToString("dd/MM/yyyy HH:mm") : ""). Puede reintentar el pago con otra tarjeta.</div>
+                    }
+                    else if (Model.EstadoReservaCodigo == "PENDIENTE")
+                    {
+                        <div class="mx-auto mb-2" style="width:56px;height:56px;border-radius:50%;background:#f1e6fb;color:#6f42c1;font-size:28px;line-height:56px">&#9201;</div>
+                        <h3 class="fw-bold" style="color:#12233f">Reserva registrada, pendiente de pago</h3>
+                        <div class="small text-muted">Pague antes de las @(Model.FechaExpiracion != null ? Model.FechaExpiracion.Value.ToString("dd/MM/yyyy HH:mm") : "") para confirmar los asientos. Si no paga, los asientos se liberan.</div>
+                    }
+                    else
+                    {
+                        <h3 class="fw-bold" style="color:#12233f">La reserva está @Model.EstadoReservaCodigo</h3>
+                    }
+                    <div class="small text-muted mt-2">Código de reserva</div>
                     <div class="fs-2 fw-bold dorado">@Model.CodigoReserva</div>
                 </div>
                 <div class="row g-2 mb-3">
                     <div class="col-6 col-md-3"><div class="dato"><small>Reserva</small><div><span class="estado e-@Model.EstadoReservaCodigo">@Model.EstadoReservaCodigo</span></div></div></div>
-                    <div class="col-6 col-md-3"><div class="dato"><small>Pago</small><div><span class="estado e-APROBADO">@(pago != null ? pago.EstadoPagoCodigo : "")</span></div></div></div>
-                    <div class="col-6 col-md-3"><div class="dato"><small>Comprobante</small><div style="font-size:.85rem">@(comprobante != null ? comprobante.NumeroComprobante : "")</div></div></div>
-                    <div class="col-6 col-md-3"><div class="dato"><small>Total</small><div style="font-size:1rem">USD @compra.Importe.ToString("N2")</div></div></div>
+                    <div class="col-6 col-md-3"><div class="dato"><small>Compra</small><div style="font-size:.85rem">@(pagada ? compra.EstadoCompraCodigo : "SIN PAGAR")</div></div></div>
+                    <div class="col-6 col-md-3"><div class="dato"><small>Pago</small><div style="font-size:.85rem">@(pago != null ? pago.EstadoPagoCodigo : (ultimoPago != null ? ultimoPago.EstadoPagoCodigo : "SIN PAGO"))</div></div></div>
+                    <div class="col-6 col-md-3"><div class="dato"><small>Total</small><div style="font-size:1rem">USD @(pagada ? compra.Importe.ToString("N2") : Model.CalcularTotal().ToString("N2"))</div></div></div>
                 </div>
+                @if (comprobante != null)
+                {
+                    <p class="small text-muted text-center">Comprobante: <b>@comprobante.NumeroComprobante</b></p>
+                }
                 @Html.Partial("~/Views/Reservas/_DetalleReserva.cshtml", Model)
                 <div class="d-flex flex-wrap gap-2 justify-content-center mt-3">
-                    <a class="btn btn-azul" href="@Url.Action("MisReservas", "Reservas")">Ver mis reservas</a>
-                    <a class="btn btn-oro" href="@Url.Action("Index", "Comprobantes", new { numero = Model.CodigoReserva })">Ver comprobante</a>
+                    @if (!pagada && Model.EstadoReservaCodigo == "PENDIENTE")
+                    {
+                        <a class="btn btn-oro" href="@Url.Action("Pagar", "Compras", new { id = Model.ReservaId })">@(rechazado ? "Reintentar pago" : "Pagar ahora")</a>
+                    }
+                    <a class="btn btn-azul" href="@Url.Action("Gestionar", "Reservas", new { id = Model.ReservaId })">Ver reserva</a>
+                    @if (pagada)
+                    {
+                        <a class="btn btn-oro" href="@Url.Action("Index", "Comprobantes", new { numero = Model.CodigoReserva })">Ver comprobante</a>
+                    }
+                    @if (esTitular)
+                    {
+                        <a class="btn btn-outline-secondary" href="@Url.Action("MisReservas", "Reservas")">Mis reservas</a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-outline-secondary" href="@Url.Action("Atencion", "Reservas")">Atención al cliente</a>
+                    }
                     <a class="btn btn-outline-secondary" href="@Url.Action("Index", "Home")">Inicio</a>
                 </div>
             </div>

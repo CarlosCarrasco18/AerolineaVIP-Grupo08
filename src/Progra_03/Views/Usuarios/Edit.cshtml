@@ -1,0 +1,79 @@
+﻿@model Progra_03.Models.UsuarioEditarViewModel
+
+@{
+    ViewBag.Title = "Editar usuario";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Actualización de los datos permitidos del usuario. Los roles solo los cambia el superusuario.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Usuarios")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            <div class="tarjeta">
+                <h2>Editar usuario @Model.UserName</h2>
+                @using (Html.BeginForm("Edit", "Usuarios", FormMethod.Post, new { id = "formUsuario" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="row g-3">
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.Email, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.Email, new { @class = "form-control", type = "email" })
+                                @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-info" })
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en Email: @ex.Message</div>
+                        }
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(model => model.Cedula, new { @class = "form-label" })
+                                @Html.TextBoxFor(model => model.Cedula, new { @class = "form-control", maxlength = "10", inputmode = "numeric" })
+                                @Html.ValidationMessageFor(model => model.Cedula, "", new { @class = "text-info" })
+                                <div id="mensajeCedula" class="text-danger small"></div>
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en Cedula: @ex.Message</div>
+                        }
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit" class="btn btn-oro px-4">Guardar</button>
+                            @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_ScriptsValidacion")
+    @Html.Partial("_ValidarCedula")
+    <script>
+        $("#Cedula").on("input", function () {
+            this.value = this.value.replace(/\D/g, "").slice(0, 10);
+        });
+
+        $("#formUsuario").on("submit", function (evento) {
+            if (!validarCedulaJS($("#Cedula").val())) {
+                mostrarMensaje("#mensajeCedula", "#Cedula", "La cédula ingresada no es válida.");
+                evento.preventDefault();
+            }
+        });
+    </script>
+}

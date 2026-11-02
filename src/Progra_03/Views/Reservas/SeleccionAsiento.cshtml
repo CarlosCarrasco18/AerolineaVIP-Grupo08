@@ -49,7 +49,7 @@
                 <div id="errorAsientos" class="text-danger small mt-2"></div>
                 <div class="d-grid gap-2 mt-3">
                     <button type="submit" class="btn btn-oro py-2">Continuar</button>
-                    <a class="btn btn-outline-secondary" href="@Url.Action("Disponibilidad", new { id = ViewBag.VueloId, itinerarioId = ViewBag.ItinerarioId, pasajeros = pasajeros })">Regresar</a>
+                    <a class="btn btn-outline-secondary" href="@Url.Action("Disponibilidad", "Vuelos", new { id = ViewBag.VueloId, itinerarioId = ViewBag.ItinerarioId, pasajeros = pasajeros })">Regresar</a>
                 </div>
             </div>
         </div>

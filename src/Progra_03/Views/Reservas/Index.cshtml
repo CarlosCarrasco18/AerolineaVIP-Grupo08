@@ -15,7 +15,17 @@
     @Html.Partial("_PestanasUsuarios", "Reservas")
 
     <div class="d-flex justify-content-between align-items-center my-3">
-        <span class="text-muted small">@Html.ActionLink("← Administración", "Index", "Admin") · @Model.Count() registro(s)</span>
+        <span class="text-muted small">
+            @if (User.IsInRole("Counter"))
+            {
+                @Html.ActionLink("← Atención al cliente", "Atencion")
+            }
+            else
+            {
+                @Html.ActionLink("← Administración", "Index", "Admin")
+            }
+            · @Model.Count() registro(s)
+        </span>
     </div>
 
     @using (Html.BeginForm("Index", "Reservas", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
@@ -61,9 +71,10 @@
                         <td class="text-end">
                             <span class="acc">
                                 @Html.ActionLink("Detalles", "Details", new { id = item.ReservaId })
+                                @Html.ActionLink("Gestionar", "Gestionar", new { id = item.ReservaId })
                                 @if (item.EstadoReservaCodigo == "CONFIRMADA")
                                 {
-                                    @Html.ActionLink("Check-in", "CheckIn", new { id = item.ReservaId })
+                                    @Html.ActionLink("Check-in", "Index", "CheckIn", new { id = item.ReservaId }, null)
                                 }
                                 @if (User.IsInRole("edit") && item.EstadoReservaCodigo == "PENDIENTE")
                                 {

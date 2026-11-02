@@ -17,19 +17,37 @@ namespace Progra_03.Controllers
     {
         private AerolineaVIPEntities db = new AerolineaVIPEntities();
 
-        public ActionResult Index(string numero, int? id)
+        public ActionResult Index(string numero, int? id, DateTime? desde, DateTime? hasta, string tipo)
         {
             if (numero == null)
             {
                 numero = "";
             }
 
+            if (tipo == null)
+            {
+                tipo = "";
+            }
+
+            if (desde != null && hasta != null && desde > hasta)
+            {
+                ViewBag.Message = "La fecha «Desde» no puede ser mayor que la fecha «Hasta».";
+                hasta = null;
+            }
+
+            DateTime? fin = null;
+            if (hasta != null)
+            {
+                fin = hasta.Value.Date.AddDays(1);
+            }
+
             string usuarioId = User.Identity.GetUserId();
-            bool verTodos = User.IsInRole("view");
+            bool verTodos = User.IsInRole("view") || User.IsInRole("Counter");
 
             var comprobantes = db.Comprobantes
                 .Include(c => c.Compra.Reserva)
                 .Where(c => (verTodos || c.Compra.Reserva.UsuarioId == usuarioId) && (c.NumeroComprobante.Contains(numero) || c.Compra.Reserva.CodigoReserva.Contains(numero)))
+                .Where(c => (desde == null || c.FechaEmision >= desde) && (fin == null || c.FechaEmision < fin) && c.TipoComprobanteCodigo.Contains(tipo))
                 .OrderByDescending(c => c.FechaEmision)
                 .ToList();
 
@@ -44,6 +62,9 @@ namespace Progra_03.Controllers
             }
 
             ViewBag.Numero = numero;
+            ViewBag.Desde = desde;
+            ViewBag.Hasta = hasta;
+            ViewBag.tipo = new SelectList(db.TipoComprobantes, "Codigo", "Descripcion", tipo);
             ViewBag.Seleccionado = seleccionado;
             ViewBag.Emisor = db.DatosEmisors.FirstOrDefault();
 

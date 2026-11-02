@@ -1,0 +1,107 @@
+﻿@{
+    ViewBag.Title = "Gestión";
+    var usuarios = (List<Progra_03.Models.UsuarioViewModel>)ViewBag.Usuarios;
+    var pasajeros = (List<Progra_03.Models.Pasajero>)ViewBag.Pasajeros;
+    var reservas = (List<Progra_03.Models.Reserva>)ViewBag.Reservas;
+    string buscar = ViewBag.Buscar;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Búsqueda general por usuario, correo, documento, nombre o código de reserva.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Gestion")
+
+    @using (Html.BeginForm("Gestion", "Admin", FormMethod.Get, new { @class = "tarjeta my-3 py-3" }))
+    {
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label">Buscar</label>
+                <input type="text" name="buscar" value="@buscar" class="form-control" required minlength="2" placeholder="Usuario, correo, cédula, nombre o código RV..." />
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-azul w-100">Consultar</button>
+            </div>
+        </div>
+    }
+
+    @if (buscar != "")
+    {
+        <h6 class="fw-bold mb-2">Usuarios (@usuarios.Count)</h6>
+        <div class="tabla mb-4">
+            <table class="table table-hover">
+                <thead><tr><th>Usuario</th><th>Correo</th><th>Cédula</th><th>Roles</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var item in usuarios)
+                    {
+                        <tr>
+                            <td><b>@item.UserName</b></td>
+                            <td>@item.Email</td>
+                            <td>@item.Cedula</td>
+                            <td>@item.Roles</td>
+                            <td class="text-end">
+                                @if (User.IsInRole("create"))
+                                {
+                                    <span class="acc">@Html.ActionLink("Asignar rol", "AsignarRol", "Usuarios", new { id = item.Id }, null)</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (usuarios.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-muted">Sin coincidencias.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <h6 class="fw-bold mb-2">Pasajeros (@pasajeros.Count)</h6>
+        <div class="tabla mb-4">
+            <table class="table table-hover">
+                <thead><tr><th>Documento</th><th>Nombre</th><th>Correo</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var item in pasajeros)
+                    {
+                        <tr>
+                            <td>@item.TipoDocumentoCodigo @item.NumeroDocumento</td>
+                            <td>@item.NombreCompleto</td>
+                            <td>@item.Correo</td>
+                            <td class="text-end"><span class="acc">@Html.ActionLink("Detalles", "Details", "Pasajeroes", new { id = item.PasajeroId }, null)</span></td>
+                        </tr>
+                    }
+                    @if (pasajeros.Count == 0)
+                    {
+                        <tr><td colspan="4" class="text-muted">Sin coincidencias.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <h6 class="fw-bold mb-2">Reservas (@reservas.Count)</h6>
+        <div class="tabla">
+            <table class="table table-hover">
+                <thead><tr><th>Código</th><th>Creada</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var item in reservas)
+                    {
+                        <tr>
+                            <td><b>@item.CodigoReserva</b></td>
+                            <td>@item.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                            <td class="text-nowrap">USD @item.CalcularTotal().ToString("N2")</td>
+                            <td><span class="estado e-@item.EstadoReservaCodigo">@item.EstadoReservaCodigo</span></td>
+                            <td class="text-end"><span class="acc">@Html.ActionLink("Gestionar", "Gestionar", "Reservas", new { id = item.ReservaId }, null)</span></td>
+                        </tr>
+                    }
+                    @if (reservas.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-muted">Sin coincidencias.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

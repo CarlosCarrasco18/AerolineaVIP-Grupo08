@@ -1,0 +1,77 @@
+﻿@model Progra_03.Models.Reserva
+
+@{
+    ViewBag.Title = "Cambiar asiento";
+    var asignaciones = (List<Progra_03.Models.ReservaPasajeroVuelo>)ViewBag.Asignaciones;
+    var primera = asignaciones[0];
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Cambiar asiento · @Model.CodigoReserva</h1>
+        <p>Counter · Gestión de cambios: elija el nuevo asiento del pasajero. Se aplica a todos sus tramos de la reserva.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    @using (Html.BeginForm("CambiarAsiento", "Reservas", new { id = Model.ReservaId, pasajeroId = ViewBag.PasajeroId }, FormMethod.Post, new { id = "formAsientos" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="tarjeta">
+                    <h2>Elija el nuevo asiento</h2>
+                    <p class="small text-muted mb-3">Haga clic en un asiento verde. El asiento actual (@primera.CodigoAsiento) aparece como ocupado o reservado.</p>
+                    @Html.Partial("_MapaAsientos", true)
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="resumen">
+                    <div class="dorado">PASAJERO</div>
+                    <h5 class="mt-2 mb-1">@primera.Pasajero.NombreCompleto</h5>
+                    <div class="small text-white-50 mb-3">
+                        @foreach (var asignacion in asignaciones)
+                        {
+                            <div>@asignacion.Vuelo.CodigoVuelo · @asignacion.Vuelo.Frecuencia.Ruta.Descripcion · @asignacion.Vuelo.FechaHoraSalida.ToString("dd/MM HH:mm")</div>
+                        }
+                    </div>
+                    <div class="d-flex justify-content-between"><span>Asiento actual</span><b>@primera.CodigoAsiento</b></div>
+                    <div class="d-flex justify-content-between"><span>Asiento nuevo</span><b id="textoAsientos">-</b></div>
+                </div>
+                <div id="errorAsientos" class="text-danger small mt-2"></div>
+                <div class="d-grid gap-2 mt-3">
+                    <button type="submit" class="btn btn-oro">Guardar cambio</button>
+                    <a class="btn btn-outline-secondary" href="@Url.Action("Gestionar", new { id = Model.ReservaId })">Volver</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function mostrarSeleccion() {
+            var codigos = $(".asiento-check:checked").map(function () { return $(this).data("codigo"); }).get();
+            $("#textoAsientos").text(codigos.length > 0 ? codigos.join(", ") : "-");
+        }
+
+        $(".asiento-check").on("change", function () {
+            if ($(".asiento-check:checked").length > 1) {
+                $(this).prop("checked", false);
+                $("#errorAsientos").text("Solo puede elegir un asiento.");
+            } else {
+                $("#errorAsientos").text("");
+            }
+            mostrarSeleccion();
+        });
+
+        $("#formAsientos").on("submit", function (evento) {
+            if ($(".asiento-check:checked").length !== 1) {
+                evento.preventDefault();
+                $("#errorAsientos").text("Elija el nuevo asiento.");
+            }
+        });
+    </script>
+}

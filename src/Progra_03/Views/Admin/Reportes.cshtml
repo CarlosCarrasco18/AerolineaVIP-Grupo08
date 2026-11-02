@@ -1,0 +1,204 @@
+﻿@{
+    ViewBag.Title = "Reportes";
+    DateTime desde = (DateTime)ViewBag.Desde;
+    DateTime hasta = (DateTime)ViewBag.Hasta;
+    DateTime corte = (DateTime)ViewBag.Corte;
+    string consulta = ViewBag.Consulta;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Consultas y reportes</h1>
+        <p>Pantalla 21 · Ocupación por vuelo, reservas por estado y compras con pagos simulados.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="mb-3 small">@Html.ActionLink("← Administración", "Index", "Admin")</div>
+
+    @Html.Partial("_Mensaje")
+
+    @using (Html.BeginForm("Reportes", "Admin", FormMethod.Get, new { @class = "tarjeta mb-3 py-3", id = "formReporte" }))
+    {
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Consulta</label>
+                <select name="consulta" class="form-select">
+                    <option value="ocupacion" @(consulta == "ocupacion" ? "selected" : "")>Ocupación por vuelo</option>
+                    <option value="reservas" @(consulta == "reservas" ? "selected" : "")>Reservas por estado</option>
+                    <option value="compras" @(consulta == "compras" ? "selected" : "")>Compras y pagos simulados</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Desde</label>
+                <input type="date" name="desde" id="desde" value="@desde.ToString("yyyy-MM-dd")" class="form-control" required />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Hasta</label>
+                <input type="date" name="hasta" id="hasta" value="@hasta.ToString("yyyy-MM-dd")" class="form-control" required />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Ruta</label>
+                @Html.DropDownList("rutaId", null, "Todas", new { @class = "form-select" })
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">Aeronave</label>
+                @Html.DropDownList("aeronaveId", null, "Todas", new { @class = "form-select" })
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Estado</label>
+                @Html.DropDownList("estado", null, "Todos", new { @class = "form-select" })
+            </div>
+            <div class="col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-azul">Consultar</button>
+                <button type="submit" class="btn btn-outline-secondary">Actualizar resultados</button>
+            </div>
+            <div class="col-12"><div id="errorReporte" class="text-danger small d-none"></div></div>
+        </div>
+    }
+
+    <p class="small text-muted">Fecha de corte: @corte.ToString("dd/MM/yyyy HH:mm") · Rango: @desde.ToString("dd/MM/yyyy") al @hasta.ToString("dd/MM/yyyy").</p>
+
+    @if (consulta == "ocupacion")
+    {
+        var vuelos = (List<Progra_03.Models.Vuelo>)ViewBag.Vuelos;
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Vuelos</small><div>@vuelos.Count</div></div></div>
+            <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Asientos ocupados</small><div>@vuelos.Sum(v => v.CalcularAsientosOcupados())</div></div></div>
+            <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Asientos libres</small><div>@vuelos.Sum(v => v.CalcularAsientosLibres())</div></div></div>
+            <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Ventas</small><div>USD @vuelos.Sum(v => v.CalcularVentas()).ToString("N2")</div></div></div>
+        </div>
+        <div class="tabla">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Vuelo</th>
+                        <th>Ruta</th>
+                        <th>Aeronave</th>
+                        <th>Estado</th>
+                        <th>Ocupados</th>
+                        <th>Reservados</th>
+                        <th>Libres</th>
+                        <th>Ventas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in vuelos)
+                    {
+                        <tr>
+                            <td>@item.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><b>@item.CodigoVuelo</b></td>
+                            <td>@item.Frecuencia.Ruta.Descripcion</td>
+                            <td>@(item.Aeronave != null ? item.Aeronave.Matricula : "Sin asignar")</td>
+                            <td><span class="estado e-@item.EstadoVueloCodigo">@item.EstadoVueloCodigo</span></td>
+                            <td>@item.CalcularAsientosOcupados()</td>
+                            <td>@item.CalcularAsientosReservados()</td>
+                            <td>@item.CalcularAsientosLibres()</td>
+                            <td class="text-nowrap">USD @item.CalcularVentas().ToString("N2")</td>
+                        </tr>
+                    }
+                    @if (vuelos.Count == 0)
+                    {
+                        <tr><td colspan="9" class="text-muted">No hay vuelos para los filtros seleccionados.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="small text-muted">Ocupados: asientos pagados (rojo). Reservados: asientos con reserva pendiente de pago (morado). Libres: capacidad de la aeronave menos ocupados y reservados. Ventas: suma de los tramos pagados.</p>
+    }
+    else if (consulta == "reservas")
+    {
+        var reservas = (List<Progra_03.Models.Reserva>)ViewBag.Reservas;
+        var resumen = (List<string>)ViewBag.Resumen;
+        <div class="tarjeta mb-3 py-2 small"><b>Total: @reservas.Count reserva(s).</b> @string.Join(" · ", resumen)</div>
+        <div class="tabla">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Creada</th>
+                        <th>Vuelos</th>
+                        <th>Pasajeros</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in reservas)
+                    {
+                        <tr>
+                            <td><b>@item.CodigoReserva</b></td>
+                            <td>@item.FechaCreacion.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="small">@item.DescripcionVuelos()</td>
+                            <td>@item.CalcularPasajeros()</td>
+                            <td class="text-nowrap">USD @item.CalcularTotal().ToString("N2")</td>
+                            <td><span class="estado e-@item.EstadoReservaCodigo">@item.EstadoReservaCodigo</span></td>
+                        </tr>
+                    }
+                    @if (reservas.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-muted">No hay reservas para los filtros seleccionados.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="small text-muted">Se cuentan las reservas creadas dentro del rango de fechas.</p>
+    }
+    else
+    {
+        var compras = (List<Progra_03.Models.Compra>)ViewBag.Compras;
+        <div class="row g-3 mb-3">
+            <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Compras</small><div>@compras.Count</div></div></div>
+            <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Pagadas</small><div>@compras.Count(c => c.EstadoCompraCodigo == "PAGADA")</div></div></div>
+            <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Pagos rechazados</small><div>@compras.Sum(c => c.Pagoes.Count(p => p.EstadoPagoCodigo == "RECHAZADO"))</div></div></div>
+            <div class="col-6 col-md-3"><div class="dato bg-white border"><small>Total pagado</small><div>USD @compras.Where(c => c.EstadoCompraCodigo == "PAGADA").Sum(c => c.Importe).ToString("N2")</div></div></div>
+        </div>
+        <div class="tabla">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Reserva</th>
+                        <th>Importe</th>
+                        <th>Compra</th>
+                        <th>Pagos simulados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in compras)
+                    {
+                        <tr>
+                            <td>@item.FechaCompra.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><b>@item.Reserva.CodigoReserva</b></td>
+                            <td class="text-nowrap">@item.MonedaCodigo @item.Importe.ToString("N2")</td>
+                            <td><span class="estado e-@item.EstadoCompraCodigo">@item.EstadoCompraCodigo</span></td>
+                            <td class="small">@string.Join(" · ", item.Pagoes.OrderBy(p => p.PagoId).Select(p => p.CodigoOperacion + " " + p.EstadoPagoCodigo))</td>
+                        </tr>
+                    }
+                    @if (compras.Count == 0)
+                    {
+                        <tr><td colspan="5" class="text-muted">No hay compras para los filtros seleccionados.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <p class="small text-muted">Total pagado: suma de las compras en estado PAGADA. Los pagos son simulados con fines académicos.</p>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $("#formReporte").on("submit", function (evento) {
+            var desde = $("#desde").val();
+            var hasta = $("#hasta").val();
+            if (!desde || !hasta) {
+                evento.preventDefault();
+                $("#errorReporte").text("Indique el rango de fechas.").removeClass("d-none");
+            } else if (desde > hasta) {
+                evento.preventDefault();
+                $("#errorReporte").text("La fecha inicial no puede ser mayor que la fecha final.").removeClass("d-none");
+            }
+        });
+    </script>
+}

@@ -1,0 +1,48 @@
+﻿@model Progra_03.Models.UsuarioViewModel
+
+@{
+    ViewBag.Title = "Eliminar usuario";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Usuarios, pasajeros y reservas</h1>
+        <p>Pantalla 20 · Eliminación de usuarios sin operaciones registradas.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_PestanasUsuarios", "Usuarios")
+
+    <div class="row justify-content-center mt-3">
+        <div class="col-lg-8">
+            @Html.Partial("_Mensaje")
+
+            <div class="tarjeta">
+                <h2>¿Desea eliminar este usuario?</h2>
+                <dl class="row mb-3">
+                    <dt class="col-sm-4 text-muted">@Html.DisplayNameFor(model => model.UserName)</dt>
+                    <dd class="col-sm-8">@Model.UserName</dd>
+                    <dt class="col-sm-4 text-muted">@Html.DisplayNameFor(model => model.Email)</dt>
+                    <dd class="col-sm-8">@Model.Email</dd>
+                    <dt class="col-sm-4 text-muted">@Html.DisplayNameFor(model => model.Cedula)</dt>
+                    <dd class="col-sm-8">@Model.Cedula</dd>
+                    <dt class="col-sm-4 text-muted">@Html.DisplayNameFor(model => model.Roles)</dt>
+                    <dd class="col-sm-8">@Model.Roles</dd>
+                </dl>
+
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="d-flex gap-2">
+                        @if (ViewBag.Message == null)
+                        {
+                            <button type="submit" class="btn btn-danger px-4">Eliminar</button>
+                        }
+                        @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

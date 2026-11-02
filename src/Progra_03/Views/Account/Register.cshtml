@@ -7,7 +7,7 @@
 <div class="encabezado">
     <div class="container">
         <h1>Crear cuenta</h1>
-        <p>Pantalla 3 · Cliente: compra pasajes. Pasajero: consulta sus viajes con su cédula.</p>
+        <p>Pantalla 3 · Cree su cuenta de cliente. Con su cédula también verá los viajes que otra persona compre a su nombre.</p>
     </div>
 </div>
 
@@ -18,10 +18,33 @@
                 @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { role = "form", id = "formRegistro" }))
                 {
                     @Html.AntiForgeryToken()
-                    @Html.Partial("_Mensaje")
                     @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
                     <div class="row g-3">
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Nombres, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.Nombres, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.Nombres, "Ingrese nombres válidos", new { @class = "text-info" })
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en Nombres: @ex.Message</div>
+                        }
+                        @try
+                        {
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Apellidos, new { @class = "form-label" })
+                                @Html.TextBoxFor(m => m.Apellidos, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(m => m.Apellidos, "Ingrese apellidos válidos", new { @class = "text-info" })
+                            </div>
+                        }
+                        catch (Exception ex)
+                        {
+                            <div class="col-12 text-danger">Error en Apellidos: @ex.Message</div>
+                        }
                         @try
                         {
                             <div class="col-md-6">
@@ -51,7 +74,7 @@
                             <div class="col-md-6">
                                 @Html.LabelFor(m => m.Cedula, new { @class = "form-label" })
                                 @Html.TextBoxFor(m => m.Cedula, new { @class = "form-control", maxlength = "10", inputmode = "numeric" })
-                                @Html.ValidationMessageFor(m => m.Cedula, "Ingrese una cédula válida", new { @class = "text-info", id = "errorCedula" })
+                                @Html.ValidationMessageFor(m => m.Cedula, "", new { @class = "text-info", id = "errorCedula" })
                                 <div id="mensajeCedula" class="text-danger small"></div>
                             </div>
                         }
@@ -63,7 +86,7 @@
                         {
                             <div class="col-md-6">
                                 @Html.LabelFor(m => m.Rol, new { @class = "form-label" })
-                                @Html.DropDownList("Rol", null, "Seleccione...", new { @class = "form-select" })
+                                @Html.DropDownList("Rol", null, new { @class = "form-select" })
                                 @Html.ValidationMessageFor(m => m.Rol, "Seleccione el tipo de cuenta", new { @class = "text-info" })
                             </div>
                         }

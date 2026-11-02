@@ -15,7 +15,6 @@ namespace Progra_03.Controllers
     {
         private AerolineaVIPEntities db = new AerolineaVIPEntities();
 
-        // GET: TramoItinerarios
         [Authorize(Roles = "view")]
         public ActionResult Index(int? itinerarioId)
         {
@@ -32,7 +31,6 @@ namespace Progra_03.Controllers
             return View(tramos);
         }
 
-        // GET: TramoItinerarios/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -47,7 +45,6 @@ namespace Progra_03.Controllers
             return View(tramoItinerario);
         }
 
-        // GET: TramoItinerarios/Create
         [Authorize(Roles = "create")]
         public ActionResult Create(int? itinerarioId)
         {
@@ -61,7 +58,6 @@ namespace Progra_03.Controllers
             return View(tramoItinerario);
         }
 
-        // POST: TramoItinerarios/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "create")]
@@ -90,7 +86,6 @@ namespace Progra_03.Controllers
             return View(tramoItinerario);
         }
 
-        // GET: TramoItinerarios/Edit/5
         [Authorize(Roles = "edit")]
         public ActionResult Edit(int? id)
         {
@@ -108,7 +103,6 @@ namespace Progra_03.Controllers
             return View(tramoItinerario);
         }
 
-        // POST: TramoItinerarios/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "edit")]
@@ -137,7 +131,6 @@ namespace Progra_03.Controllers
             return View(tramoItinerario);
         }
 
-        // GET: TramoItinerarios/Delete/5
         [Authorize(Roles = "delete")]
         public ActionResult Delete(int? id)
         {
@@ -157,7 +150,6 @@ namespace Progra_03.Controllers
             return View(tramoItinerario);
         }
 
-        // POST: TramoItinerarios/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "delete")]

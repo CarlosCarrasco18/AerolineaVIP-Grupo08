@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Progra_03.Models;
 using Progra_03.Services;
 
@@ -18,36 +19,14 @@ namespace Progra_03.Controllers
         private AerolineaVIPEntities db = new AerolineaVIPEntities();
         private ReservaServices servicioReservas = new ReservaServices();
 
-        public ActionResult Disponibilidad(int? id, int? itinerarioId, int? pasajeros)
-        {
-            if (pasajeros == null || pasajeros < 1 || pasajeros > Vuelo.CapacidadMaxima)
-            {
-                pasajeros = 1;
-            }
-
-            servicioReservas.LiberarVencidas(db);
-
-            List<Vuelo> vuelos = CargarVuelos(id, itinerarioId);
-            if (vuelos.Count == 0)
-            {
-                return HttpNotFound();
-            }
-
-            if (vuelos.Any(v => !v.PermiteVenta()))
-            {
-                ViewBag.Message = "Este vuelo no está disponible para la venta.";
-            }
-
-            CargarMapa(vuelos);
-            ViewBag.VueloId = id;
-            ViewBag.ItinerarioId = itinerarioId;
-            ViewBag.Pasajeros = pasajeros;
-            return View(vuelos);
-        }
-
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Cliente,Counter")]
         public ActionResult SeleccionAsiento(int? id, int? itinerarioId, int? pasajeros)
         {
+            if (User.IsInRole("Counter") && Session["Cliente"] == null)
+            {
+                return RedirectToAction("Atencion");
+            }
+
             if (pasajeros == null || pasajeros < 1 || pasajeros > Vuelo.CapacidadMaxima)
             {
                 pasajeros = 1;
@@ -63,7 +42,7 @@ namespace Progra_03.Controllers
 
             if (vuelos.Any(v => !v.PermiteVenta()))
             {
-                return RedirectToAction("Disponibilidad", new { id = id, itinerarioId = itinerarioId, pasajeros = pasajeros });
+                return RedirectToAction("Disponibilidad", "Vuelos", new { id = id, itinerarioId = itinerarioId, pasajeros = pasajeros });
             }
 
             CargarMapa(vuelos);
@@ -76,7 +55,7 @@ namespace Progra_03.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Cliente,Counter")]
         public ActionResult SeleccionAsiento(int? id, int? itinerarioId, int pasajeros, List<byte> asientos)
         {
             if (asientos == null)
@@ -129,13 +108,13 @@ namespace Progra_03.Controllers
             return RedirectToAction("Pasajeros");
         }
 
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Cliente,Counter")]
         public ActionResult Pasajeros()
         {
             var seleccion = (SeleccionReserva)Session["Seleccion"];
             if (seleccion == null)
             {
-                return RedirectToAction("Buscar", "Home");
+                return RedirectToAction("Buscar", "Vuelos");
             }
 
             List<Pasajero> pasajeros = new List<Pasajero>();
@@ -159,13 +138,13 @@ namespace Progra_03.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Cliente,Counter")]
         public ActionResult Pasajeros(List<Pasajero> pasajeros)
         {
             var seleccion = (SeleccionReserva)Session["Seleccion"];
             if (seleccion == null)
             {
-                return RedirectToAction("Buscar", "Home");
+                return RedirectToAction("Buscar", "Vuelos");
             }
 
             if (pasajeros == null || pasajeros.Count != seleccion.CantidadPasajeros)
@@ -175,7 +154,6 @@ namespace Progra_03.Controllers
 
             List<int> vueloIds = seleccion.VueloIds;
             List<string> documentos = new List<string>();
-            List<string> mensajes = new List<string>();
             for (int i = 0; i < pasajeros.Count; i++)
             {
                 if (pasajeros[i].NumeroDocumento != null)
@@ -187,20 +165,18 @@ namespace Progra_03.Controllers
                 if (error != null)
                 {
                     ModelState.AddModelError("[" + i + "].NumeroDocumento", error);
-                    mensajes.Add("Pasajero " + (i + 1) + ": " + error);
                 }
 
                 if (documentos.Contains(pasajeros[i].NumeroDocumento))
                 {
                     ModelState.AddModelError("[" + i + "].NumeroDocumento", "Este documento ya está en otro pasajero de la reserva.");
-                    mensajes.Add("Pasajero " + (i + 1) + ": este documento ya está en otro pasajero de la reserva.");
                 }
                 documentos.Add(pasajeros[i].NumeroDocumento);
 
-                if (pasajeros[i].FechaNacimiento != null && pasajeros[i].FechaNacimiento > DateTime.Today)
+                string errorFecha = pasajeros[i].ValidarFechaNacimiento();
+                if (errorFecha != null)
                 {
-                    ModelState.AddModelError("[" + i + "].FechaNacimiento", "La fecha de nacimiento no puede ser futura.");
-                    mensajes.Add("Pasajero " + (i + 1) + ": la fecha de nacimiento no puede ser futura.");
+                    ModelState.AddModelError("[" + i + "].FechaNacimiento", errorFecha);
                 }
             }
 
@@ -220,7 +196,6 @@ namespace Progra_03.Controllers
                         if (yaViaja)
                         {
                             ModelState.AddModelError("[" + i + "].NumeroDocumento", "Este pasajero ya tiene un asiento en este vuelo.");
-                            mensajes.Add("Pasajero " + (i + 1) + ": ya tiene un asiento en este vuelo.");
                         }
 
                         registrado.Nombres = pasajeros[i].Nombres;
@@ -243,10 +218,6 @@ namespace Progra_03.Controllers
 
             if (!ModelState.IsValid)
             {
-                if (mensajes.Count > 0)
-                {
-                    ViewBag.Message = string.Join(" ", mensajes);
-                }
                 CargarResumen(seleccion);
                 return View(pasajeros);
             }
@@ -267,13 +238,13 @@ namespace Progra_03.Controllers
             return RedirectToAction("Confirmar");
         }
 
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Cliente,Counter")]
         public ActionResult Confirmar()
         {
             var seleccion = (SeleccionReserva)Session["Seleccion"];
             if (seleccion == null)
             {
-                return RedirectToAction("Buscar", "Home");
+                return RedirectToAction("Buscar", "Vuelos");
             }
 
             if (seleccion.PasajeroIds.Count != seleccion.CantidadPasajeros)
@@ -287,13 +258,13 @@ namespace Progra_03.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Cliente")]
-        public ActionResult Confirmar(bool aceptaCondiciones = false)
+        [Authorize(Roles = "Cliente,Counter")]
+        public ActionResult Confirmar(bool aceptaCondiciones = false, string accion = "reservar")
         {
             var seleccion = (SeleccionReserva)Session["Seleccion"];
             if (seleccion == null)
             {
-                return RedirectToAction("Buscar", "Home");
+                return RedirectToAction("Buscar", "Vuelos");
             }
 
             servicioReservas.LiberarVencidas(db);
@@ -303,8 +274,23 @@ namespace Progra_03.Controllers
             List<byte> ocupados = servicioReservas.AsientosOcupados(db, vueloIds, "CONFIRMADA");
             List<byte> reservados = servicioReservas.AsientosOcupados(db, vueloIds, "PENDIENTE");
 
+            string usuarioId = User.Identity.GetUserId();
+            if (User.IsInRole("Counter"))
+            {
+                var cliente = (ApplicationUser)Session["Cliente"];
+                usuarioId = null;
+                if (cliente != null)
+                {
+                    usuarioId = cliente.Id;
+                }
+            }
+
             string mensaje = null;
-            if (!aceptaCondiciones)
+            if (usuarioId == null)
+            {
+                mensaje = "Seleccione primero al cliente en Atención al cliente.";
+            }
+            else if (!aceptaCondiciones)
             {
                 mensaje = "Debe confirmar los datos y aceptar las condiciones de transporte.";
             }
@@ -326,7 +312,7 @@ namespace Progra_03.Controllers
 
             DateTime ahora = DateTime.Now;
             Reserva reserva = new Reserva();
-            reserva.UsuarioId = User.Identity.GetUserId();
+            reserva.UsuarioId = usuarioId;
             reserva.FechaCreacion = ahora;
             reserva.FechaExpiracion = ahora.AddMinutes(Reserva.MinutosParaPagar);
             reserva.EstadoReservaCodigo = "PENDIENTE";
@@ -353,13 +339,26 @@ namespace Progra_03.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Message = "No se pudo registrar la reserva: " + ex.GetBaseException().Message;
+                db.Reservas.Remove(reserva);
+                string detalle = ex.GetBaseException().Message;
+                if (detalle.Contains("UX_RPV") || detalle.Contains("duplicate") || detalle.Contains("duplicada"))
+                {
+                    ViewBag.Message = "Otra persona acaba de reservar uno de los asientos elegidos. No se registró nada: vuelva a elegir los asientos.";
+                }
+                else
+                {
+                    ViewBag.Message = "No se pudo registrar la reserva: " + detalle;
+                }
                 CargarResumen(seleccion);
                 return View();
             }
 
             Session["Seleccion"] = null;
-            return RedirectToAction("Pagar", "Compras", new { id = reserva.ReservaId });
+            if (accion == "pagar")
+            {
+                return RedirectToAction("Pagar", "Compras", new { id = reserva.ReservaId });
+            }
+            return RedirectToAction("Confirmacion", "Compras", new { id = reserva.ReservaId });
         }
 
         [Authorize(Roles = "Cliente,Pasajero")]
@@ -413,6 +412,22 @@ namespace Progra_03.Controllers
                 .OrderByDescending(r => r.FechaCreacion)
                 .ToList();
 
+            var usuarioCliente = (ApplicationUser)Session["User"];
+            string cedulaCliente = "";
+            if (usuarioCliente != null && usuarioCliente.PhoneNumber != null)
+            {
+                cedulaCliente = usuarioCliente.PhoneNumber;
+            }
+
+            ViewBag.Viajes = db.ReservaPasajeroVueloes
+                .Include(a => a.Reserva)
+                .Include(a => a.Pasajero)
+                .Include(a => a.Vuelo.Frecuencia.Ruta.Aeropuerto)
+                .Include(a => a.Vuelo.Frecuencia.Ruta.Aeropuerto1)
+                .Where(a => a.Pasajero.NumeroDocumento == cedulaCliente && a.Reserva.UsuarioId != usuarioId && a.Reserva.EstadoReservaCodigo.Contains(estado))
+                .OrderBy(a => a.Vuelo.FechaOperacion)
+                .ToList();
+
             return View(reservas);
         }
 
@@ -426,7 +441,7 @@ namespace Progra_03.Controllers
             servicioReservas.LiberarVencidas(db);
 
             Reserva reserva = db.Reservas.Find(id);
-            if (reserva == null || reserva.UsuarioId != User.Identity.GetUserId())
+            if (reserva == null || !PuedeGestionar(reserva))
             {
                 return HttpNotFound();
             }
@@ -438,7 +453,7 @@ namespace Progra_03.Controllers
         public ActionResult Cancelar(int id, bool confirmacion = false)
         {
             Reserva reserva = db.Reservas.Find(id);
-            if (reserva == null || reserva.UsuarioId != User.Identity.GetUserId())
+            if (reserva == null || !PuedeCancelar(reserva))
             {
                 return HttpNotFound();
             }
@@ -502,75 +517,169 @@ namespace Progra_03.Controllers
             return View("Gestionar", reserva);
         }
 
-        public ActionResult CheckIn(int? id, int? asignacionId)
+        [Authorize(Roles = "Counter,edit")]
+        public ActionResult CambiarAsiento(int? id, int? pasajeroId)
         {
-            if (id == null)
+            if (id == null || pasajeroId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
             Reserva reserva = db.Reservas.Find(id);
-            if (reserva == null || !PuedeVer(reserva))
+            if (reserva == null)
             {
                 return HttpNotFound();
             }
 
-            CargarCheckIn(reserva, asignacionId);
+            List<ReservaPasajeroVuelo> asignaciones = reserva.ReservaPasajeroVueloes.Where(a => a.PasajeroId == pasajeroId).ToList();
+            if (asignaciones.Count == 0)
+            {
+                return HttpNotFound();
+            }
+
+            string mensaje = ValidarCambioAsiento(reserva, asignaciones);
+            if (mensaje != null)
+            {
+                ViewBag.Message = mensaje;
+                return View("Gestionar", reserva);
+            }
+
+            CargarCambioAsiento(reserva, asignaciones);
             return View(reserva);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult RealizarCheckIn(int asignacionId)
+        [Authorize(Roles = "Counter,edit")]
+        public ActionResult CambiarAsiento(int id, int pasajeroId, List<byte> asientos)
         {
-            ReservaPasajeroVuelo asignacion = db.ReservaPasajeroVueloes.Find(asignacionId);
-            if (asignacion == null || !PuedeVer(asignacion.Reserva))
+            Reserva reserva = db.Reservas.Find(id);
+            if (reserva == null)
             {
                 return HttpNotFound();
             }
 
-            string mensaje = null;
-            if (asignacion.EstadoAsignacionCodigo != "CONFIRMADA")
+            List<ReservaPasajeroVuelo> asignaciones = reserva.ReservaPasajeroVueloes.Where(a => a.PasajeroId == pasajeroId).ToList();
+            if (asignaciones.Count == 0)
             {
-                mensaje = "El check-in solo se puede realizar con el asiento pagado (CONFIRMADA).";
+                return HttpNotFound();
             }
-            else if (!asignacion.Vuelo.CheckInAbierto())
+
+            if (asientos == null)
             {
-                mensaje = "El check-in del vuelo " + asignacion.Vuelo.CodigoVuelo + " se habilita " + Vuelo.HorasCheckIn + " horas antes de la salida (" + asignacion.Vuelo.FechaHoraSalida.AddHours(-Vuelo.HorasCheckIn).ToString("dd/MM/yyyy HH:mm") + ").";
+                asientos = new List<byte>();
             }
-            else if (asignacion.CheckIns.Any(c => c.EstadoCheckInCodigo == "COMPLETADO"))
+
+            string mensaje = ValidarCambioAsiento(reserva, asignaciones);
+            if (mensaje != null)
             {
-                mensaje = "El pasajero ya realizó el check-in de este vuelo.";
+                ViewBag.Message = mensaje;
+                return View("Gestionar", reserva);
+            }
+
+            List<int> vueloIds = asignaciones.Select(a => a.VueloId).ToList();
+            List<byte> ocupados = servicioReservas.AsientosOcupados(db, vueloIds, "CONFIRMADA");
+            List<byte> reservados = servicioReservas.AsientosOcupados(db, vueloIds, "PENDIENTE");
+            int modeloId = asignaciones[0].Vuelo.Aeronave.ModeloAeronaveId;
+
+            if (asientos.Count != 1)
+            {
+                mensaje = "Elija un solo asiento nuevo.";
+            }
+            else if (!db.Asientoes.Any(a => a.ModeloAeronaveId == modeloId && a.NumeroAsiento == asientos[0]))
+            {
+                mensaje = "El asiento elegido no existe en la aeronave.";
+            }
+            else if (ocupados.Contains(asientos[0]) || reservados.Contains(asientos[0]))
+            {
+                mensaje = "El asiento elegido acaba de ser tomado. Elija otro asiento.";
             }
 
             if (mensaje != null)
             {
                 ViewBag.Message = mensaje;
-                CargarCheckIn(asignacion.Reserva, null);
-                return View("CheckIn", asignacion.Reserva);
+                CargarCambioAsiento(reserva, asignaciones);
+                return View(reserva);
             }
 
-            CheckIn checkIn = new CheckIn();
-            checkIn.AsignacionId = asignacion.AsignacionId;
-            checkIn.FechaRegistro = DateTime.Now;
-            checkIn.EstadoCheckInCodigo = "COMPLETADO";
+            string anterior = asignaciones[0].CodigoAsiento;
+            foreach (var asignacion in asignaciones)
+            {
+                asignacion.NumeroAsiento = asientos[0];
+            }
+
             try
             {
-                db.CheckIns.Add(checkIn);
                 db.SaveChanges();
+                ViewBag.Message = "Asiento de " + asignaciones[0].Pasajero.NombreCompleto + " cambiado de " + anterior + " a " + asignaciones[0].CodigoAsiento + ".";
             }
             catch (Exception ex)
             {
-                db.CheckIns.Remove(checkIn);
-                ViewBag.Message = "No se pudo registrar el check-in: " + ex.GetBaseException().Message;
-                CargarCheckIn(asignacion.Reserva, null);
-                return View("CheckIn", asignacion.Reserva);
+                foreach (var asignacion in asignaciones)
+                {
+                    db.Entry(asignacion).Reload();
+                }
+                ViewBag.Message = "No se pudo cambiar el asiento: " + ex.GetBaseException().Message;
             }
 
-            return RedirectToAction("CheckIn", new { id = asignacion.ReservaId, asignacionId = asignacion.AsignacionId });
+            return View("Gestionar", db.Reservas.Find(id));
         }
 
-        [Authorize(Roles = "view")]
+        [Authorize(Roles = "Counter")]
+        public ActionResult Atencion(string buscar, bool terminar = false)
+        {
+            if (terminar)
+            {
+                Session["Cliente"] = null;
+                Session["Seleccion"] = null;
+            }
+
+            if (buscar != null && buscar.Trim() != "")
+            {
+                buscar = buscar.Trim();
+
+                ApplicationDbContext contexto = new ApplicationDbContext();
+                var usermanager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(contexto));
+                var encontrado = usermanager.Users.FirstOrDefault(u => u.UserName == buscar || u.PhoneNumber == buscar);
+
+                if (encontrado == null)
+                {
+                    ViewBag.Message = "No existe un cliente con el usuario o la cédula " + buscar + ".";
+                }
+                else if (!usermanager.IsInRole(encontrado.Id, "Cliente"))
+                {
+                    ViewBag.Message = "La cuenta " + encontrado.UserName + " no es de tipo Cliente.";
+                }
+                else
+                {
+                    Session["Cliente"] = encontrado;
+                    Session["Seleccion"] = null;
+                }
+
+                contexto.Dispose();
+            }
+
+            servicioReservas.LiberarVencidas(db);
+
+            var cliente = (ApplicationUser)Session["Cliente"];
+            List<Reserva> reservas = new List<Reserva>();
+            if (cliente != null)
+            {
+                string clienteId = cliente.Id;
+                reservas = db.Reservas
+                    .Include(r => r.ReservaPasajeroVueloes.Select(a => a.Vuelo.Frecuencia.Ruta.Aeropuerto))
+                    .Include(r => r.ReservaPasajeroVueloes.Select(a => a.Vuelo.Frecuencia.Ruta.Aeropuerto1))
+                    .Where(r => r.UsuarioId == clienteId)
+                    .OrderByDescending(r => r.FechaCreacion)
+                    .ToList();
+            }
+
+            ViewBag.Cliente = cliente;
+            ViewBag.Buscar = buscar;
+            return View(reservas);
+        }
+
+        [Authorize(Roles = "view,Counter")]
         public ActionResult Index(string buscar, string estado)
         {
             servicioReservas.LiberarVencidas(db);
@@ -790,48 +899,85 @@ namespace Progra_03.Controllers
             ViewBag.TipoDocumentoCodigo = db.TipoDocumentoIdentidads.ToList();
         }
 
-        private void CargarCheckIn(Reserva reserva, int? asignacionId)
+        private string ValidarCambioAsiento(Reserva reserva, List<ReservaPasajeroVuelo> asignaciones)
         {
-            var asignaciones = reserva.ReservaPasajeroVueloes.OrderBy(a => a.Vuelo.FechaOperacion).ThenBy(a => a.Vuelo.Frecuencia.HoraSalida).ToList();
-
-            if (User.IsInRole("Pasajero"))
+            if (reserva.EstadoReservaCodigo != "PENDIENTE" && reserva.EstadoReservaCodigo != "CONFIRMADA")
             {
-                var usuario = (ApplicationUser)Session["User"];
-                asignaciones = asignaciones.Where(a => a.Pasajero.NumeroDocumento == usuario.PhoneNumber).ToList();
+                return "Solo se puede cambiar el asiento de una reserva PENDIENTE o CONFIRMADA.";
             }
 
+            if (asignaciones.Any(a => a.Vuelo.FechaHoraSalida <= DateTime.Now))
+            {
+                return "El vuelo ya salió; no se puede cambiar el asiento.";
+            }
+
+            if (asignaciones.Any(a => a.TieneCheckIn()))
+            {
+                return "El pasajero ya hizo el check-in; no se puede cambiar el asiento.";
+            }
+
+            if (asignaciones.Any(a => a.Vuelo.Aeronave == null))
+            {
+                return "El vuelo no tiene aeronave asignada.";
+            }
+
+            return null;
+        }
+
+        private void CargarCambioAsiento(Reserva reserva, List<ReservaPasajeroVuelo> asignaciones)
+        {
+            List<Vuelo> vuelos = asignaciones.Select(a => a.Vuelo).ToList();
+            CargarMapa(vuelos);
+            ViewBag.Elegidos = new List<byte>();
             ViewBag.Asignaciones = asignaciones;
-            ViewBag.Tarjeta = null;
-
-            if (asignacionId != null)
-            {
-                ReservaPasajeroVuelo tarjeta = asignaciones.FirstOrDefault(a => a.AsignacionId == asignacionId);
-                if (tarjeta != null && tarjeta.CheckIns.Any(c => c.EstadoCheckInCodigo == "COMPLETADO"))
-                {
-                    ViewBag.Tarjeta = tarjeta;
-                }
-            }
+            ViewBag.PasajeroId = asignaciones[0].PasajeroId;
         }
 
         private bool PuedeVer(Reserva reserva)
         {
-            if (User.IsInRole("view"))
+            if (PuedeGestionar(reserva))
             {
                 return true;
             }
 
-            if (reserva.UsuarioId == User.Identity.GetUserId())
+            string cedula = CedulaUsuario();
+            if (cedula != "")
             {
-                return true;
-            }
-
-            var usuario = (ApplicationUser)Session["User"];
-            if (usuario != null && usuario.PhoneNumber != null)
-            {
-                return reserva.ReservaPasajeroVueloes.Any(a => a.Pasajero.NumeroDocumento == usuario.PhoneNumber);
+                return reserva.ReservaPasajeroVueloes.Any(a => a.Pasajero.NumeroDocumento == cedula);
             }
 
             return false;
+        }
+
+        private bool PuedeGestionar(Reserva reserva)
+        {
+            if (User.IsInRole("view") || User.IsInRole("Counter"))
+            {
+                return true;
+            }
+
+            return reserva.UsuarioId == User.Identity.GetUserId();
+        }
+
+        private bool PuedeCancelar(Reserva reserva)
+        {
+            if (User.IsInRole("edit") || User.IsInRole("Counter"))
+            {
+                return true;
+            }
+
+            return reserva.UsuarioId == User.Identity.GetUserId();
+        }
+
+        private string CedulaUsuario()
+        {
+            var usuario = (ApplicationUser)Session["User"];
+            if (usuario != null && usuario.PhoneNumber != null)
+            {
+                return usuario.PhoneNumber;
+            }
+
+            return "";
         }
 
         protected override void Dispose(bool disposing)

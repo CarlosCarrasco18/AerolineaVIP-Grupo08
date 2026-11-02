@@ -18,7 +18,7 @@ namespace Progra_03.Controllers
         private AerolineaVIPEntities db = new AerolineaVIPEntities();
         private ReservaServices servicioReservas = new ReservaServices();
 
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Cliente,Counter")]
         public ActionResult Pagar(int? id)
         {
             if (id == null)
@@ -29,7 +29,7 @@ namespace Progra_03.Controllers
             servicioReservas.LiberarVencidas(db);
 
             Reserva reserva = db.Reservas.Find(id);
-            if (reserva == null || reserva.UsuarioId != User.Identity.GetUserId())
+            if (reserva == null || !PuedePagar(reserva))
             {
                 return HttpNotFound();
             }
@@ -49,11 +49,11 @@ namespace Progra_03.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Cliente")]
+        [Authorize(Roles = "Cliente,Counter")]
         public ActionResult Pagar(PagoViewModel modelo)
         {
             Reserva reserva = db.Reservas.Find(modelo.ReservaId);
-            if (reserva == null || reserva.UsuarioId != User.Identity.GetUserId())
+            if (reserva == null || !PuedePagar(reserva))
             {
                 return HttpNotFound();
             }
@@ -92,18 +92,6 @@ namespace Progra_03.Controllers
 
             if (!ModelState.IsValid)
             {
-                List<string> mensajes = new List<string>();
-                foreach (string campo in new[] { "NumeroTarjeta", "CodigoSeguridad", "Vencimiento" })
-                {
-                    if (ModelState.ContainsKey(campo))
-                    {
-                        mensajes.AddRange(ModelState[campo].Errors.Select(e => e.ErrorMessage));
-                    }
-                }
-                if (mensajes.Count > 0)
-                {
-                    ViewBag.Message = string.Join(" ", mensajes);
-                }
                 CargarListas(modelo);
                 ViewBag.Reserva = reserva;
                 return View(modelo);
@@ -122,6 +110,8 @@ namespace Progra_03.Controllers
                 db.Compras.Add(compra);
             }
 
+            bool rechazado = modelo.NumeroTarjeta.EndsWith("0000");
+
             compra.FechaCompra = ahora;
             compra.Importe = total;
             compra.EstadoCompraCodigo = "PAGADA";
@@ -134,10 +124,31 @@ namespace Progra_03.Controllers
             pago.MarcaTarjetaCodigo = modelo.MarcaTarjetaCodigo;
             pago.UltimosCuatroDigitos = modelo.NumeroTarjeta.Substring(modelo.NumeroTarjeta.Length - 4);
             pago.NombreTitular = modelo.NombreTitular.Trim().ToUpper();
-            pago.CodigoOperacion = "OP-" + ahora.ToString("yyyyMMddHHmmss") + "-" + reserva.ReservaId;
+            pago.CodigoOperacion = "SIM-" + reserva.CodigoReserva + "-" + (compra.Pagoes.Count + 1).ToString("D2");
             pago.EsSimulado = true;
             pago.MensajeResultado = "Pago aprobado.";
             compra.Pagoes.Add(pago);
+
+            if (rechazado)
+            {
+                compra.EstadoCompraCodigo = "PENDIENTE";
+                pago.EstadoPagoCodigo = "RECHAZADO";
+                pago.MensajeResultado = "Pago rechazado por el emisor (simulación: tarjeta terminada en 0000).";
+
+                try
+                {
+                    db.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "No se pudo registrar el pago: " + ex.GetBaseException().Message);
+                    CargarListas(modelo);
+                    ViewBag.Reserva = reserva;
+                    return View(modelo);
+                }
+
+                return RedirectToAction("Confirmacion", new { id = reserva.ReservaId });
+            }
 
             Comprobante comprobante = new Comprobante();
             comprobante.TipoComprobanteCodigo = "FACTURA";
@@ -175,22 +186,35 @@ namespace Progra_03.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
+            servicioReservas.LiberarVencidas(db);
+
             Reserva reserva = db.Reservas.Find(id);
-            if (reserva == null || reserva.UsuarioId != User.Identity.GetUserId())
+            if (reserva == null || !PuedePagar(reserva))
             {
                 return HttpNotFound();
             }
 
             Compra compra = reserva.Compras.FirstOrDefault(c => c.EstadoCompraCodigo == "PAGADA");
-            if (compra == null)
+            ViewBag.UltimoPago = reserva.Compras.SelectMany(c => c.Pagoes).OrderByDescending(p => p.PagoId).FirstOrDefault();
+            ViewBag.Compra = compra;
+            ViewBag.Pago = null;
+            ViewBag.Comprobante = null;
+            if (compra != null)
             {
-                return RedirectToAction("Pagar", new { id = reserva.ReservaId });
+                ViewBag.Pago = compra.Pagoes.Where(p => p.EstadoPagoCodigo == "APROBADO").OrderByDescending(p => p.FechaPago).FirstOrDefault();
+                ViewBag.Comprobante = compra.Comprobantes.Where(c => c.TipoComprobanteCodigo == "FACTURA").FirstOrDefault();
+            }
+            return View(reserva);
+        }
+
+        private bool PuedePagar(Reserva reserva)
+        {
+            if (User.IsInRole("Counter"))
+            {
+                return true;
             }
 
-            ViewBag.Compra = compra;
-            ViewBag.Pago = compra.Pagoes.Where(p => p.EstadoPagoCodigo == "APROBADO").OrderByDescending(p => p.FechaPago).FirstOrDefault();
-            ViewBag.Comprobante = compra.Comprobantes.Where(c => c.TipoComprobanteCodigo == "FACTURA").FirstOrDefault();
-            return View(reserva);
+            return reserva.UsuarioId == User.Identity.GetUserId();
         }
 
         private void CargarListas(PagoViewModel modelo)

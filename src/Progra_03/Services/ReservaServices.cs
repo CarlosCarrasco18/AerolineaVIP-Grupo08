@@ -34,6 +34,25 @@ namespace Progra_03.Services
             }
         }
 
+        public void RegistrarPasajeroCuenta(AerolineaVIPEntities db, string cedula, string nombres, string apellidos, string correo)
+        {
+            bool existe = db.Pasajeroes.Any(p => p.TipoDocumentoCodigo == "CEDULA" && p.NumeroDocumento == cedula);
+            if (existe)
+            {
+                return;
+            }
+
+            Pasajero pasajero = new Pasajero();
+            pasajero.TipoDocumentoCodigo = "CEDULA";
+            pasajero.NumeroDocumento = cedula;
+            pasajero.Nombres = nombres.Trim();
+            pasajero.Apellidos = apellidos.Trim();
+            pasajero.Correo = correo;
+            pasajero.FechaRegistro = DateTime.Now;
+            db.Pasajeroes.Add(pasajero);
+            db.SaveChanges();
+        }
+
         public List<byte> AsientosOcupados(AerolineaVIPEntities db, List<int> vueloIds, string estado)
         {
             return db.ReservaPasajeroVueloes

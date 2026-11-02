@@ -33,6 +33,26 @@ namespace Progra_03.Models
             return null;
         }
 
+        public string ValidarFechaNacimiento()
+        {
+            if (FechaNacimiento == null)
+            {
+                return null;
+            }
+
+            if (FechaNacimiento.Value.Date <= new DateTime(1900, 1, 1))
+            {
+                return "La fecha de nacimiento debe ser posterior al 01/01/1900.";
+            }
+
+            if (FechaNacimiento.Value.Date > DateTime.Today)
+            {
+                return "La fecha de nacimiento no puede ser futura.";
+            }
+
+            return null;
+        }
+
         public static bool CedulaValida(string cedula)
         {
             if (cedula == null || cedula.Length != 10 || !cedula.All(char.IsDigit))

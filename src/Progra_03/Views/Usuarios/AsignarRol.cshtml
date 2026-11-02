@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "Asignar rol";
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Asignar rol</h1>
+        <p>Pantalla 20 · Solo el superusuario puede cambiar el perfil de un usuario.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="tarjeta">
+                <dl class="row mb-3">
+                    <dt class="col-sm-4 text-muted">Usuario</dt>
+                    <dd class="col-sm-8"><b>@ViewBag.UserName</b></dd>
+                    <dt class="col-sm-4 text-muted">Correo</dt>
+                    <dd class="col-sm-8">@ViewBag.Email</dd>
+                    <dt class="col-sm-4 text-muted">Roles actuales</dt>
+                    <dd class="col-sm-8">@ViewBag.Roles</dd>
+                </dl>
+
+                @if (ViewBag.EsSuperUsuario)
+                {
+                    <div class="alert alert-info small">No se pueden cambiar los permisos del superusuario.</div>
+                }
+                else
+                {
+                    using (Html.BeginForm("AsignarRol", "Usuarios", new { id = ViewBag.Id }, FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <label class="form-label">Nuevo perfil</label>
+                        @Html.DropDownList("perfil", null, "Seleccione...", new { @class = "form-select mb-2", required = "required" })
+                        <p class="small text-muted">Administrador: view, edit, delete · Counter: Counter · Cliente: Cliente. Los roles anteriores se reemplazan. El usuario verá el cambio al volver a iniciar sesión.</p>
+                        <button type="submit" class="btn btn-oro w-100">Guardar</button>
+                    }
+                }
+                @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary w-100 mt-2" })
+            </div>
+        </div>
+    </div>
+</div>

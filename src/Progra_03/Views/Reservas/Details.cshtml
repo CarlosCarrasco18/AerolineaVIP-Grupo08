@@ -67,7 +67,7 @@
     <div class="d-flex gap-2 mt-3">
         @if (Model.EstadoReservaCodigo == "CONFIRMADA")
         {
-            @Html.ActionLink("Check-in", "CheckIn", new { id = Model.ReservaId }, new { @class = "btn btn-oro" })
+            @Html.ActionLink("Check-in", "Index", "CheckIn", new { id = Model.ReservaId }, new { @class = "btn btn-oro" })
         }
         @Html.ActionLink("Volver a la lista", "Index", null, new { @class = "btn btn-outline-secondary" })
     </div>

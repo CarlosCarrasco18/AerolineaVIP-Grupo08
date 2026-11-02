@@ -1,8 +1,12 @@
-﻿@model Progra_03.Models.Reserva
+﻿@using Microsoft.AspNet.Identity
+@model Progra_03.Models.Reserva
 
 @{
     ViewBag.Title = "Gestionar reserva";
     bool vigente = Model.EstadoReservaCodigo == "PENDIENTE" || Model.EstadoReservaCodigo == "CONFIRMADA";
+    bool esTitular = Model.UsuarioId == User.Identity.GetUserId();
+    bool puedeCancelar = esTitular || User.IsInRole("edit") || User.IsInRole("Counter");
+    bool puedeCambiar = vigente && (User.IsInRole("edit") || User.IsInRole("Counter"));
 }
 
 <div class="encabezado">
@@ -25,30 +29,76 @@
         <div class="col-lg-4">
             <div class="tarjeta">
                 <h2>Acciones</h2>
-                @if (Model.EstadoReservaCodigo == "PENDIENTE")
+                @if (Model.EstadoReservaCodigo == "PENDIENTE" && (esTitular || User.IsInRole("Counter")))
                 {
                     <a class="btn btn-oro w-100 mb-2" href="@Url.Action("Pagar", "Compras", new { id = Model.ReservaId })">Pagar ahora</a>
                 }
                 @if (Model.EstadoReservaCodigo == "CONFIRMADA")
                 {
-                    <a class="btn btn-azul w-100 mb-2" href="@Url.Action("CheckIn", new { id = Model.ReservaId })">Check-in</a>
+                    <a class="btn btn-azul w-100 mb-2" href="@Url.Action("Index", "CheckIn", new { id = Model.ReservaId })">Check-in</a>
                     <a class="btn btn-outline-dark w-100 mb-2" href="@Url.Action("Index", "Comprobantes", new { numero = Model.CodigoReserva })">Ver comprobante</a>
                 }
-                @if (vigente)
+                @if (puedeCambiar)
                 {
-                    using (Html.BeginForm("Cancelar", "Reservas", new { id = Model.ReservaId }, FormMethod.Post))
+                    <hr />
+                    <p class="small fw-bold mb-1">Cambio de asiento</p>
+                    foreach (var pasajero in Model.ReservaPasajeroVueloes.Select(a => a.Pasajero).Distinct())
                     {
-                        @Html.AntiForgeryToken()
-                        <hr />
-                        <p class="small text-muted">Si cancela, los asientos vuelven a estar disponibles. Esta acción no se puede deshacer.</p>
-                        <div class="form-check small mb-3">
-                            <input class="form-check-input" type="checkbox" name="confirmacion" value="true" id="confirmacion" />
-                            <label class="form-check-label" for="confirmacion">Confirmo que deseo cancelar la reserva.</label>
-                        </div>
-                        <button type="submit" class="btn btn-danger w-100">Cancelar reserva</button>
+                        <a class="btn btn-sm btn-outline-dark w-100 mb-1" href="@Url.Action("CambiarAsiento", new { id = Model.ReservaId, pasajeroId = pasajero.PasajeroId })">Cambiar asiento de @pasajero.NombreCompleto</a>
                     }
                 }
-                <a class="btn btn-outline-secondary w-100 mt-2" href="@Url.Action("MisReservas")">Volver</a>
+                @if (vigente && puedeCancelar)
+                {
+                    <hr />
+                    <p class="small text-muted">Si cancela, los asientos vuelven a estar disponibles. Esta acción no se puede deshacer.</p>
+                    <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#modalCancelar">Solicitar cancelación</button>
+
+                    <div class="modal fade" id="modalCancelar" tabindex="-1" aria-labelledby="tituloModalCancelar" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                @using (Html.BeginForm("Cancelar", "Reservas", new { id = Model.ReservaId }, FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="tituloModalCancelar">¿Cancelar la reserva @Model.CodigoReserva?</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                    </div>
+                                    <div class="modal-body small">
+                                        <p class="mb-2">Consecuencias de la cancelación:</p>
+                                        <ul class="mb-3">
+                                            <li>La reserva y sus asientos pasan a CANCELADA y los asientos vuelven a estar disponibles.</li>
+                                            @if (Model.EstadoReservaCodigo == "CONFIRMADA")
+                                            {
+                                                <li>La compra pasa a ANULADA, el pago simulado a REVERSADO y el comprobante a ANULADO.</li>
+                                            }
+                                            <li>No se puede cancelar si algún vuelo ya salió o si un pasajero hizo el check-in.</li>
+                                        </ul>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="confirmacion" value="true" id="confirmacion" />
+                                            <label class="form-check-label" for="confirmacion">Confirmo que deseo cancelar la reserva.</label>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Regresar</button>
+                                        <button type="submit" class="btn btn-danger">Confirmar cancelación</button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+                @if (esTitular)
+                {
+                    <a class="btn btn-outline-secondary w-100 mt-2" href="@Url.Action("MisReservas")">Volver</a>
+                }
+                else if (User.IsInRole("Counter"))
+                {
+                    <a class="btn btn-outline-secondary w-100 mt-2" href="@Url.Action("Atencion")">Volver</a>
+                }
+                else
+                {
+                    <a class="btn btn-outline-secondary w-100 mt-2" href="@Url.Action("Index")">Volver</a>
+                }
             </div>
         </div>
     </div>

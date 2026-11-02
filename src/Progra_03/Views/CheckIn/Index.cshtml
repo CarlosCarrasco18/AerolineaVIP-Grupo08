@@ -1,0 +1,190 @@
+﻿@model Progra_03.Models.Reserva
+
+@{
+    ViewBag.Title = "Check-in";
+    var asignaciones = (List<Progra_03.Models.ReservaPasajeroVuelo>)ViewBag.Asignaciones;
+    var tarjeta = ViewBag.Tarjeta as Progra_03.Models.ReservaPasajeroVuelo;
+}
+
+<div class="encabezado no-imprimir">
+    <div class="container">
+        <h1>Check-in en línea</h1>
+        <p>Pantalla 15 · Localice la reserva, seleccione a los pasajeros y confirme; al completar se muestra la tarjeta de embarque.</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="no-imprimir">
+        @Html.Partial("_Mensaje")
+        @if (ViewBag.Exito != null)
+        {
+            <div class="alert alert-success small">@ViewBag.Exito</div>
+        }
+        <div class="alert alert-info small">El check-in se habilita @Progra_03.Models.Vuelo.HorasCheckIn horas antes de la salida, se cierra a la hora de salida y solo aplica a asientos confirmados (pagados).</div>
+
+        @using (Html.BeginForm("Index", "CheckIn", FormMethod.Get, new { @class = "tarjeta mb-3 py-3", id = "formLocalizar" }))
+        {
+            <h2>1. Localizar reserva</h2>
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Código de reserva</label>
+                    <input type="text" name="codigo" id="codigo" value="@ViewBag.Codigo" class="form-control" placeholder="RV00000000" maxlength="10" />
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Número de documento del pasajero</label>
+                    <input type="text" name="documento" id="documento" value="@ViewBag.Documento" class="form-control" maxlength="20" />
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-azul w-100">Iniciar check-in</button>
+                </div>
+            </div>
+            <div id="errorLocalizar" class="text-danger small mt-2 d-none"></div>
+        }
+
+        @if (Model != null)
+        {
+            using (Html.BeginForm("Confirmar", "CheckIn", new { reservaId = Model.ReservaId }, FormMethod.Post, new { id = "formCheckIn" }))
+            {
+                @Html.AntiForgeryToken()
+                <h2 class="mt-2">2. Pasajeros · Reserva @Model.CodigoReserva</h2>
+                <div class="tabla">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Pasajero</th>
+                                <th>Vuelo</th>
+                                <th>Salida</th>
+                                <th>Asiento</th>
+                                <th>Elegibilidad</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var asignacion in asignaciones)
+                            {
+                                bool elegible = asignacion.EstadoAsignacionCodigo == "CONFIRMADA" && asignacion.Vuelo.CheckInAbierto() && !asignacion.TieneCheckIn();
+                                <tr>
+                                    <td>
+                                        @if (elegible)
+                                        {
+                                            <input class="form-check-input casilla-pasajero" type="checkbox" name="asignaciones" value="@asignacion.AsignacionId" />
+                                        }
+                                    </td>
+                                    <td>@asignacion.Pasajero.NombreCompleto</td>
+                                    <td>@asignacion.Vuelo.CodigoVuelo · @asignacion.Vuelo.Frecuencia.Ruta.Descripcion</td>
+                                    <td>@asignacion.Vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@asignacion.CodigoAsiento</td>
+                                    <td>
+                                        @if (asignacion.TieneCheckIn())
+                                        {
+                                            <span class="estado e-verde">COMPLETADO</span>
+                                        }
+                                        else if (asignacion.EstadoAsignacionCodigo != "CONFIRMADA")
+                                        {
+                                            <span class="estado e-rojo">No elegible: @asignacion.EstadoAsignacionCodigo</span>
+                                        }
+                                        else if (elegible)
+                                        {
+                                            <span class="estado e-amarillo">Elegible</span>
+                                        }
+                                        else if (asignacion.Vuelo.FechaHoraSalida <= DateTime.Now)
+                                        {
+                                            <span class="estado e-rojo">Cerrado</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="estado">Desde @asignacion.Vuelo.FechaHoraSalida.AddHours(-Progra_03.Models.Vuelo.HorasCheckIn).ToString("dd/MM HH:mm")</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (asignacion.TieneCheckIn())
+                                        {
+                                            <span class="acc">@Html.ActionLink("Ver tarjeta", "Index", new { id = Model.ReservaId, asignacionId = asignacion.AsignacionId })</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                            @if (asignaciones.Count == 0)
+                            {
+                                <tr><td colspan="7" class="text-muted">No hay pasajeros para mostrar en esta reserva.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div id="errorCheckIn" class="text-danger small mb-2 d-none">Seleccione al menos un pasajero elegible.</div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-oro">Confirmar check-in</button>
+                    @Html.ActionLink("Consultar estado", "Index", new { id = Model.ReservaId }, new { @class = "btn btn-outline-dark" })
+                    @if (User.IsInRole("view") || User.IsInRole("Counter"))
+                    {
+                        @Html.ActionLink("Volver a la lista", "Index", "Reservas", null, new { @class = "btn btn-outline-secondary" })
+                    }
+                    else
+                    {
+                        @Html.ActionLink("Volver a mis reservas", "MisReservas", "Reservas", null, new { @class = "btn btn-outline-secondary" })
+                    }
+                </div>
+            }
+        }
+    </div>
+
+    @if (tarjeta != null)
+    {
+        <div class="tarjeta pase mt-4">
+            <div class="d-flex justify-content-between">
+                <b class="dorado">AEROLÍNEA VIP</b>
+                <b style="color:#12233f">TARJETA DE EMBARQUE</b>
+            </div>
+            <div class="row text-center my-3">
+                <div class="col">
+                    <div class="fs-2 fw-bold" style="color:#12233f">@tarjeta.Vuelo.Frecuencia.Ruta.Aeropuerto1.CodigoIATA</div>
+                    <small class="text-muted">@tarjeta.Vuelo.Frecuencia.Ruta.Aeropuerto1.Localidad</small>
+                </div>
+                <div class="col pt-3">@tarjeta.Vuelo.CodigoVuelo &#9992;</div>
+                <div class="col">
+                    <div class="fs-2 fw-bold" style="color:#12233f">@tarjeta.Vuelo.Frecuencia.Ruta.Aeropuerto.CodigoIATA</div>
+                    <small class="text-muted">@tarjeta.Vuelo.Frecuencia.Ruta.Aeropuerto.Localidad</small>
+                </div>
+            </div>
+            <div class="row small">
+                <div class="col">Pasajero<br /><b>@tarjeta.Pasajero.Apellidos.ToUpper(), @tarjeta.Pasajero.Nombres.ToUpper()</b></div>
+                <div class="col">Fecha<br /><b>@tarjeta.Vuelo.FechaOperacion.ToString("dd/MM/yyyy")</b></div>
+                <div class="col">Salida<br /><b>@tarjeta.Vuelo.Frecuencia.HoraSalida.ToString(@"hh\:mm")</b></div>
+                <div class="col">Asiento<br /><b class="fs-5">@tarjeta.CodigoAsiento</b></div>
+                <div class="col">Reserva<br /><b>@Model.CodigoReserva</b></div>
+                <div class="col text-end no-imprimir"><button type="button" class="btn btn-sm btn-azul mt-2" onclick="window.print()">Imprimir</button></div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $("#formLocalizar").on("submit", function (evento) {
+            var codigo = $("#codigo").val().trim().toUpperCase();
+            var documento = $("#documento").val().trim();
+            var mensaje = "";
+
+            if (codigo === "" || documento === "") {
+                mensaje = "Ingrese el código de reserva y el número de documento del pasajero.";
+            } else if (!/^RV[0-9]{8}$/.test(codigo)) {
+                mensaje = "El código de reserva tiene el formato RV seguido de 8 dígitos.";
+            } else if (documento.length < 5 || documento.length > 20) {
+                mensaje = "El documento debe tener entre 5 y 20 caracteres.";
+            }
+
+            if (mensaje !== "") {
+                evento.preventDefault();
+                $("#errorLocalizar").text(mensaje).removeClass("d-none");
+            }
+        });
+
+        $("#formCheckIn").on("submit", function (evento) {
+            if ($(".casilla-pasajero:checked").length === 0) {
+                evento.preventDefault();
+                $("#errorCheckIn").removeClass("d-none");
+            }
+        });
+    </script>
+}

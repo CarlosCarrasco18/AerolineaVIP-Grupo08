@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
@@ -204,11 +204,12 @@
     <Compile Include="Controllers\ComprobantesController.cs" />
     <Compile Include="Controllers\FrecuenciasController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\VuelosController.cs" />
+    <Compile Include="Controllers\CheckInController.cs" />
     <Compile Include="Controllers\ItinerariosController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Controllers\ModeloAeronavesController.cs" />
     <Compile Include="Controllers\PasajeroesController.cs" />
-    <Compile Include="Controllers\ReportesController.cs" />
     <Compile Include="Controllers\ReservasController.cs" />
     <Compile Include="Controllers\RutasController.cs" />
     <Compile Include="Controllers\TramoItinerariosController.cs" />
@@ -218,6 +219,7 @@
     <Compile Include="Models\Itinerario_Calculos.cs" />
     <Compile Include="Models\ReservaPasajeroVuelo_Calculos.cs" />
     <Compile Include="Services\ReservaServices.cs" />
+    <Compile Include="Services\VueloServices.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -384,10 +386,10 @@
     <Content Include="Views\Frecuencias\Details.cshtml" />
     <Content Include="Views\Frecuencias\Edit.cshtml" />
     <Content Include="Views\Frecuencias\Index.cshtml" />
-    <Content Include="Views\Home\Buscar.cshtml" />
+    <Content Include="Views\Vuelos\Buscar.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Home\_FiltroDestinos.cshtml" />
-    <Content Include="Views\Home\Resultados.cshtml" />
+    <Content Include="Views\Shared\_FiltroDestinos.cshtml" />
+    <Content Include="Views\Vuelos\Resultados.cshtml" />
     <Content Include="Views\Itinerarios\Create.cshtml" />
     <Content Include="Views\Itinerarios\Delete.cshtml" />
     <Content Include="Views\Itinerarios\Details.cshtml" />
@@ -409,21 +411,27 @@
     <Content Include="Views\Pasajeroes\Details.cshtml" />
     <Content Include="Views\Pasajeroes\Edit.cshtml" />
     <Content Include="Views\Pasajeroes\Index.cshtml" />
-    <Content Include="Views\Reportes\Index.cshtml" />
-    <Content Include="Views\Reservas\CheckIn.cshtml" />
+    <Content Include="Views\Admin\Reportes.cshtml" />
+    <Content Include="Views\Admin\Vuelos.cshtml" />
+    <Content Include="Views\Admin\Aeronaves.cshtml" />
+    <Content Include="Views\Admin\Gestion.cshtml" />
+    <Content Include="Views\CheckIn\Index.cshtml" />
     <Content Include="Views\Reservas\Confirmar.cshtml" />
     <Content Include="Views\Reservas\Delete.cshtml" />
     <Content Include="Views\Reservas\Details.cshtml" />
-    <Content Include="Views\Reservas\Disponibilidad.cshtml" />
+    <Content Include="Views\Vuelos\Disponibilidad.cshtml" />
     <Content Include="Views\Reservas\Edit.cshtml" />
     <Content Include="Views\Reservas\Gestionar.cshtml" />
     <Content Include="Views\Reservas\Index.cshtml" />
     <Content Include="Views\Reservas\MisReservas.cshtml" />
     <Content Include="Views\Reservas\MisViajes.cshtml" />
+    <Content Include="Views\Reservas\Atencion.cshtml" />
+    <Content Include="Views\Reservas\CambiarAsiento.cshtml" />
+    <Content Include="Views\Shared\_AvisoEdad.cshtml" />
     <Content Include="Views\Reservas\Pasajeros.cshtml" />
     <Content Include="Views\Reservas\SeleccionAsiento.cshtml" />
     <Content Include="Views\Reservas\_DetalleReserva.cshtml" />
-    <Content Include="Views\Reservas\_MapaAsientos.cshtml" />
+    <Content Include="Views\Shared\_MapaAsientos.cshtml" />
     <Content Include="Views\Rutas\Create.cshtml" />
     <Content Include="Views\Rutas\Delete.cshtml" />
     <Content Include="Views\Rutas\Details.cshtml" />
@@ -446,6 +454,10 @@
     <Content Include="Views\TramoItinerarios\Edit.cshtml" />
     <Content Include="Views\TramoItinerarios\Index.cshtml" />
     <Content Include="Views\Usuarios\Index.cshtml" />
+    <Content Include="Views\Usuarios\Create.cshtml" />
+    <Content Include="Views\Usuarios\AsignarRol.cshtml" />
+    <Content Include="Views\Usuarios\Edit.cshtml" />
+    <Content Include="Views\Usuarios\Delete.cshtml" />
     <Content Include="Views\Vueloes\Create.cshtml" />
     <Content Include="Views\Vueloes\Delete.cshtml" />
     <Content Include="Views\Vueloes\Details.cshtml" />

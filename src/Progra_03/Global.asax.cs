@@ -66,6 +66,11 @@ namespace Progra_03
             {
                 rolemanager.Create(new IdentityRole("Pasajero"));
             }
+
+            if (!rolemanager.RoleExists("Counter"))
+            {
+                rolemanager.Create(new IdentityRole("Counter"));
+            }
         }
 
         private void CrearSuperUsuario(ApplicationDbContext db)
@@ -177,6 +182,11 @@ namespace Progra_03
             var administrador = usermanager.FindByName("administrador");
             if (administrador != null)
             {
+                if (!usermanager.IsInRole(administrador.Id, "view"))
+                {
+                    usermanager.AddToRole(administrador.Id, "view");
+                }
+
                 if (!usermanager.IsInRole(administrador.Id, "edit"))
                 {
                     usermanager.AddToRole(administrador.Id, "edit");
@@ -191,9 +201,14 @@ namespace Progra_03
             var counter = usermanager.FindByName("counter.uio");
             if (counter != null)
             {
-                if (!usermanager.IsInRole(counter.Id, "view"))
+                if (usermanager.IsInRole(counter.Id, "view"))
                 {
-                    usermanager.AddToRole(counter.Id, "view");
+                    usermanager.RemoveFromRole(counter.Id, "view");
+                }
+
+                if (!usermanager.IsInRole(counter.Id, "Counter"))
+                {
+                    usermanager.AddToRole(counter.Id, "Counter");
                 }
             }
 

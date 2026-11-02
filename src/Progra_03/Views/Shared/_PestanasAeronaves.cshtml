@@ -1,6 +1,7 @@
 ﻿@model string
 
 <div class="pestanas mb-2">
+    <a class="@(Model == "Flota" ? "activo" : "")" href="@Url.Action("Aeronaves", "Admin")">Flota</a>
     <a class="@(Model == "Aeronaves" ? "activo" : "")" href="@Url.Action("Index", "Aeronaves")">Aeronaves</a>
     <a class="@(Model == "Modelos" ? "activo" : "")" href="@Url.Action("Index", "ModeloAeronaves")">Modelos de aeronave</a>
 </div>

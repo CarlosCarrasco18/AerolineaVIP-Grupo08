@@ -15,7 +15,6 @@ namespace Progra_03.Controllers
     {
         private AerolineaVIPEntities db = new AerolineaVIPEntities();
 
-        // GET: ModeloAeronaves
         [Authorize(Roles = "view")]
         public ActionResult Index()
         {
@@ -23,7 +22,6 @@ namespace Progra_03.Controllers
             return View(modelos);
         }
 
-        // GET: ModeloAeronaves/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -38,14 +36,12 @@ namespace Progra_03.Controllers
             return View(modeloAeronave);
         }
 
-        // GET: ModeloAeronaves/Create
         [Authorize(Roles = "create")]
         public ActionResult Create()
         {
             return View();
         }
 
-        // POST: ModeloAeronaves/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "create")]
@@ -73,7 +69,6 @@ namespace Progra_03.Controllers
             return View(modeloAeronave);
         }
 
-        // GET: ModeloAeronaves/Edit/5
         [Authorize(Roles = "edit")]
         public ActionResult Edit(int? id)
         {
@@ -90,7 +85,6 @@ namespace Progra_03.Controllers
             return View(modeloAeronave);
         }
 
-        // POST: ModeloAeronaves/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "edit")]
@@ -118,7 +112,6 @@ namespace Progra_03.Controllers
             return View(modeloAeronave);
         }
 
-        // GET: ModeloAeronaves/Delete/5
         [Authorize(Roles = "delete")]
         public ActionResult Delete(int? id)
         {
@@ -138,7 +131,6 @@ namespace Progra_03.Controllers
             return View(modeloAeronave);
         }
 
-        // POST: ModeloAeronaves/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "delete")]

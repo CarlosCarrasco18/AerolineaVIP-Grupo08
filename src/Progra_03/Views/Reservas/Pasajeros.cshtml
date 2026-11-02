@@ -27,7 +27,6 @@
         @Html.AntiForgeryToken()
         <div class="row g-4">
             <div class="col-lg-8">
-                @Html.Partial("_Mensaje")
                 @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                 @for (int i = 0; i < Model.Count; i++)
                 {
@@ -90,8 +89,9 @@
                             {
                                 <div class="col-md-4">
                                     @Html.LabelFor(m => m[i].FechaNacimiento, htmlAttributes: new { @class = "form-label" })
-                                    @Html.EditorFor(m => m[i].FechaNacimiento, new { htmlAttributes = new { @class = "form-control", max = DateTime.Today.ToString("yyyy-MM-dd") } })
-                                    @Html.ValidationMessageFor(m => m[i].FechaNacimiento, "Ingrese una fecha de nacimiento válida", new { @class = "text-info" })
+                                    @Html.EditorFor(m => m[i].FechaNacimiento, new { htmlAttributes = new { @class = "form-control fecha-nacimiento", min = "1900-01-02", max = DateTime.Today.ToString("yyyy-MM-dd") } })
+                                    @Html.ValidationMessageFor(m => m[i].FechaNacimiento, "", new { @class = "text-info" })
+                                    <div class="small aviso-edad" style="color:#8a5a00"></div>
                                 </div>
                             }
                             catch (Exception ex)
@@ -156,6 +156,7 @@
 @section Scripts {
     @Html.Partial("_ScriptsValidacion")
     @Html.Partial("_ValidarCedula")
+    @Html.Partial("_AvisoEdad")
     <script>
         function validarDocumento(bloque) {
             var tipo = bloque.find(".tipo-documento").val();

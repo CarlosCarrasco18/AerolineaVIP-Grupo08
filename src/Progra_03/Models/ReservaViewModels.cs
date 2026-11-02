@@ -56,8 +56,29 @@ namespace Progra_03.Models
         public string CodigoSeguridad { get; set; }
     }
 
+    public class UsuarioEditarViewModel
+    {
+        public string Id { get; set; }
+
+        [Display(Name = "Usuario")]
+        public string UserName { get; set; }
+
+        [Required(ErrorMessage = "Ingrese el correo electrónico.")]
+        [EmailAddress(ErrorMessage = "Ingrese un correo electrónico válido.")]
+        [StringLength(256)]
+        [Display(Name = "Correo electrónico")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Ingrese la cédula.")]
+        [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "La cédula debe tener 10 dígitos.")]
+        [Display(Name = "Cédula")]
+        public string Cedula { get; set; }
+    }
+
     public class UsuarioViewModel
     {
+        public string Id { get; set; }
+
         [Display(Name = "Usuario")]
         public string UserName { get; set; }
 

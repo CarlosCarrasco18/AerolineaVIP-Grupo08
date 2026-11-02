@@ -15,14 +15,27 @@
 </div>
 
 <div class="container">
+    <div class="no-imprimir">@Html.Partial("_Mensaje")</div>
     <div class="row g-4">
         <div class="col-lg-5 no-imprimir">
             @using (Html.BeginForm("Index", "Comprobantes", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
             {
                 <div class="row g-2 align-items-end">
-                    <div class="col-8">
+                    <div class="col-12">
                         <label class="form-label">Número o código de reserva</label>
                         <input type="text" name="numero" value="@ViewBag.Numero" class="form-control" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Desde</label>
+                        <input type="date" name="desde" value="@(ViewBag.Desde != null ? ((DateTime)ViewBag.Desde).ToString("yyyy-MM-dd") : "")" class="form-control" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Hasta</label>
+                        <input type="date" name="hasta" value="@(ViewBag.Hasta != null ? ((DateTime)ViewBag.Hasta).ToString("yyyy-MM-dd") : "")" class="form-control" />
+                    </div>
+                    <div class="col-8">
+                        <label class="form-label">Tipo</label>
+                        @Html.DropDownList("tipo", null, "Todos", new { @class = "form-select" })
                     </div>
                     <div class="col-4">
                         <button type="submit" class="btn btn-azul w-100">Buscar</button>
@@ -63,7 +76,14 @@
                 {
                     @Html.ActionLink("Ver todos", "Index", null, new { @class = "btn btn-outline-dark" })
                 }
-                @Html.ActionLink("Volver a mis reservas", "MisReservas", "Reservas", null, new { @class = "btn btn-outline-secondary" })
+                @if (User.IsInRole("Counter"))
+                {
+                    @Html.ActionLink("Volver a atención al cliente", "Atencion", "Reservas", null, new { @class = "btn btn-outline-secondary" })
+                }
+                else if (User.IsInRole("Cliente") || User.IsInRole("Pasajero"))
+                {
+                    @Html.ActionLink("Volver a mis reservas", "MisReservas", "Reservas", null, new { @class = "btn btn-outline-secondary" })
+                }
             </div>
         </div>
 
