@@ -1,0 +1,35 @@
+﻿<script>
+    function mostrarAvisoEdad(campo) {
+        var aviso = $(campo).parent().find(".aviso-edad");
+        var valor = $(campo).val();
+        aviso.text("");
+
+        if (!valor) {
+            return;
+        }
+
+        var partes = valor.split("-");
+        var nacimiento = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+        var hoy = new Date();
+        var edad = hoy.getFullYear() - nacimiento.getFullYear();
+        if (hoy.getMonth() < nacimiento.getMonth() || (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate())) {
+            edad = edad - 1;
+        }
+
+        if (nacimiento > hoy) {
+            aviso.text("La fecha de nacimiento no puede ser futura.");
+        } else if (edad < 2) {
+            aviso.text("Aviso: el pasajero es un bebé (menor de 2 años). Verifique que la fecha sea correcta.");
+        } else if (edad < 18) {
+            aviso.text("Aviso: el pasajero es menor de edad (" + edad + " años).");
+        }
+    }
+
+    $(".fecha-nacimiento").on("change", function () {
+        mostrarAvisoEdad(this);
+    });
+
+    $(".fecha-nacimiento").each(function () {
+        mostrarAvisoEdad(this);
+    });
+</script>

@@ -81,8 +81,9 @@
                 {
                     <div class="col-md-4">
                         @Html.LabelFor(model => model.FechaNacimiento, htmlAttributes: new { @class = "form-label" })
-                        @Html.EditorFor(model => model.FechaNacimiento, new { htmlAttributes = new { @class = "form-control" } })
-                        @Html.ValidationMessageFor(model => model.FechaNacimiento, "Ingrese una fecha de nacimiento válida", new { @class = "text-info" })
+                        @Html.EditorFor(model => model.FechaNacimiento, new { htmlAttributes = new { @class = "form-control fecha-nacimiento", min = "1900-01-02", max = DateTime.Today.ToString("yyyy-MM-dd") } })
+                        @Html.ValidationMessageFor(model => model.FechaNacimiento, "", new { @class = "text-info" })
+                        <div class="small aviso-edad" style="color:#8a5a00"></div>
                     </div>
                 }
                 catch (Exception ex)
@@ -127,6 +128,7 @@
 @section Scripts {
     @Html.Partial("_ScriptsValidacion")
     @Html.Partial("_ValidarCedula")
+    @Html.Partial("_AvisoEdad")
     <script>
         $("#NumeroDocumento").on("blur", function () {
             var tipo = $("#TipoDocumentoCodigo").val();

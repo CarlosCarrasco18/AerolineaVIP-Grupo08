@@ -86,8 +86,9 @@
                     <div class="small text-white-50 mt-2">Al confirmar, la reserva queda <b class="text-white">PENDIENTE</b> y los asientos se apartan (morado) durante @Progra_03.Models.Reserva.MinutosParaPagar minutos. Si no paga en ese tiempo, los asientos se liberan.</div>
                 </div>
                 <div class="d-grid gap-2 mt-3">
-                    <button type="submit" class="btn btn-oro py-2">Confirmar reserva</button>
-                    <a class="btn btn-outline-secondary" href="@Url.Action("Pasajeros")">Volver</a>
+                    <button type="submit" name="accion" value="pagar" class="btn btn-oro py-2">Confirmar y pagar</button>
+                    <button type="submit" name="accion" value="reservar" class="btn btn-azul py-2">Confirmar reserva (pagar después)</button>
+                    <a class="btn btn-outline-secondary" href="@Url.Action("Pasajeros")">Volver a modificar</a>
                 </div>
             </div>
         </div>

@@ -15,7 +15,6 @@ namespace Progra_03.Controllers
     {
         private AerolineaVIPEntities db = new AerolineaVIPEntities();
 
-        // GET: Pasajeroes
         [Authorize(Roles = "view")]
         public ActionResult Index(string buscar)
         {
@@ -34,7 +33,7 @@ namespace Progra_03.Controllers
             return View(pasajeros);
         }
 
-        // GET: Pasajeroes/Details/5
+        [Authorize(Roles = "view")]
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -49,7 +48,6 @@ namespace Progra_03.Controllers
             return View(pasajero);
         }
 
-        // GET: Pasajeroes/Create
         [Authorize(Roles = "create")]
         public ActionResult Create()
         {
@@ -57,7 +55,6 @@ namespace Progra_03.Controllers
             return View();
         }
 
-        // POST: Pasajeroes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "create")]
@@ -96,7 +93,6 @@ namespace Progra_03.Controllers
             return View(pasajero);
         }
 
-        // GET: Pasajeroes/Edit/5
         [Authorize(Roles = "edit")]
         public ActionResult Edit(int? id)
         {
@@ -114,7 +110,6 @@ namespace Progra_03.Controllers
             return View(pasajero);
         }
 
-        // POST: Pasajeroes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "edit")]
@@ -153,7 +148,6 @@ namespace Progra_03.Controllers
             return View(pasajero);
         }
 
-        // GET: Pasajeroes/Delete/5
         [Authorize(Roles = "delete")]
         public ActionResult Delete(int? id)
         {
@@ -173,7 +167,6 @@ namespace Progra_03.Controllers
             return View(pasajero);
         }
 
-        // POST: Pasajeroes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "delete")]
@@ -215,9 +208,10 @@ namespace Progra_03.Controllers
                 return "Ya existe un pasajero con ese documento.";
             }
 
-            if (pasajero.FechaNacimiento != null && pasajero.FechaNacimiento > DateTime.Today)
+            string errorFecha = pasajero.ValidarFechaNacimiento();
+            if (errorFecha != null)
             {
-                return "La fecha de nacimiento no puede ser futura.";
+                return errorFecha;
             }
             return null;
         }

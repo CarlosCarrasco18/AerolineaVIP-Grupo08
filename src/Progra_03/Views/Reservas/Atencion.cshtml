@@ -1,0 +1,97 @@
+﻿@model IEnumerable<Progra_03.Models.Reserva>
+
+@{
+    ViewBag.Title = "Atención al cliente";
+    var cliente = ViewBag.Cliente as Progra_03.Models.ApplicationUser;
+}
+
+<div class="encabezado">
+    <div class="container">
+        <h1>Atención al cliente</h1>
+        <p>Counter · Busque al cliente por su usuario o cédula para comprar, gestionar o hacer el check-in en su nombre.</p>
+    </div>
+</div>
+
+<div class="container">
+    @Html.Partial("_Mensaje")
+
+    @using (Html.BeginForm("Atencion", "Reservas", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
+    {
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label">Usuario o cédula del cliente</label>
+                <input type="text" name="buscar" value="@ViewBag.Buscar" class="form-control" required />
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-azul w-100">Buscar cliente</button>
+            </div>
+        </div>
+    }
+
+    @if (cliente != null)
+    {
+        <div class="tarjeta mb-3">
+            <div class="row align-items-center g-2">
+                <div class="col-md">
+                    <small class="text-muted">Cliente atendido</small>
+                    <div class="fw-bold">@cliente.UserName · Cédula @cliente.PhoneNumber · @cliente.Email</div>
+                </div>
+                <div class="col-md-auto d-flex gap-2">
+                    <a class="btn btn-oro" href="@Url.Action("Buscar", "Vuelos")">Comprar pasajes para este cliente</a>
+                    <a class="btn btn-outline-secondary" href="@Url.Action("Atencion", new { terminar = true })">Terminar atención</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabla">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Creada</th>
+                        <th>Vuelos</th>
+                        <th>Pasajeros</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><b>@item.CodigoReserva</b></td>
+                            <td>@item.FechaCreacion.ToString("dd/MM/yyyy")</td>
+                            <td class="small">@item.DescripcionVuelos()</td>
+                            <td>@item.CalcularPasajeros()</td>
+                            <td class="text-nowrap">USD @item.CalcularTotal().ToString("N2")</td>
+                            <td><span class="estado e-@item.EstadoReservaCodigo">@item.EstadoReservaCodigo</span></td>
+                            <td class="text-end">
+                                <span class="acc">
+                                    @Html.ActionLink("Gestionar", "Gestionar", new { id = item.ReservaId })
+                                    @if (item.EstadoReservaCodigo == "PENDIENTE")
+                                    {
+                                        @Html.ActionLink("Pagar", "Pagar", "Compras", new { id = item.ReservaId }, null)
+                                    }
+                                    @if (item.EstadoReservaCodigo == "CONFIRMADA")
+                                    {
+                                        @Html.ActionLink("Check-in", "Index", "CheckIn", new { id = item.ReservaId }, null)
+                                        @Html.ActionLink("Comprobante", "Index", "Comprobantes", new { numero = item.CodigoReserva }, null)
+                                    }
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Count() == 0)
+                    {
+                        <tr><td colspan="7" class="text-muted">El cliente no tiene reservas registradas.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info small">Para comprar pasajes en nombre de un cliente, primero búsquelo aquí. La reserva, el pago y el comprobante quedarán a nombre del cliente.</div>
+    }
+</div>

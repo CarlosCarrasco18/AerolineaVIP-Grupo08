@@ -9,13 +9,14 @@
 <div class="encabezado">
     <div class="container">
         <h1>Pago</h1>
-        <p>Pantalla 11 · Complete los datos de su tarjeta.</p>
+        <p>Pantalla 11 · Complete los datos de la tarjeta y confirme el pago en la ventana de confirmación.</p>
         @Html.Partial("_Pasos", 5)
     </div>
 </div>
 
 <div class="container">
     @Html.Partial("_Mensaje")
+    <div class="alert alert-warning small"><b>Simulación académica:</b> no se realizan cobros reales. Una tarjeta terminada en 0000 simula un pago rechazado.</div>
 
     <div class="row g-4">
         <div class="col-lg-7">
@@ -105,15 +106,40 @@
                                 <div class="col-12 text-danger">Error en CodigoSeguridad: @ex.Message</div>
                             }
                             <div class="col-12 d-grid">
-                                <button type="submit" class="btn btn-oro py-2">Pagar USD @reserva.CalcularTotal().ToString("N2")</button>
+                                <button type="button" id="btnPagar" class="btn btn-oro py-2">Pagar USD @reserva.CalcularTotal().ToString("N2")</button>
                             </div>
                         </div>
                     </div>
                 }
+
+                <div class="modal fade" id="modalConfirmarPago" tabindex="-1" aria-labelledby="tituloModalPago" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="tituloModalPago">¿Está seguro de que desea realizar este pago?</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body small">
+                                <div class="d-flex justify-content-between"><span>Reserva</span><b>@reserva.CodigoReserva</b></div>
+                                <div class="d-flex justify-content-between"><span>Vuelos</span><b class="text-end">@reserva.DescripcionVuelos()</b></div>
+                                <div class="d-flex justify-content-between"><span>Pasajeros</span><b>@reserva.CalcularPasajeros()</b></div>
+                                <div class="d-flex justify-content-between"><span>Método</span><b id="modalMetodo"></b></div>
+                                <div class="d-flex justify-content-between"><span>Tarjeta</span><b id="modalTarjeta"></b></div>
+                                <hr />
+                                <div class="d-flex justify-content-between"><span>Monto total</span><b class="fs-5">USD @reserva.CalcularTotal().ToString("N2")</b></div>
+                                <div class="text-muted mt-2">Estado: pago simulado sin procesar. Si cancela, no se registra ningún pago.</div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" id="btnConfirmarPago" class="btn btn-oro">Pagar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
             else
             {
-                <a class="btn btn-outline-secondary" href="@Url.Action("MisReservas", "Reservas")">Ir a mis reservas</a>
+                <a class="btn btn-outline-secondary" href="@Url.Action(User.IsInRole("Counter") ? "Atencion" : "MisReservas", "Reservas")">Volver</a>
             }
         </div>
         <div class="col-lg-5">
@@ -125,7 +151,7 @@
                 <hr />
                 <div class="d-flex justify-content-between"><span>Total</span><b class="fs-4">USD @reserva.CalcularTotal().ToString("N2")</b></div>
             </div>
-            <a class="btn btn-outline-secondary w-100 mt-3" href="@Url.Action("MisReservas", "Reservas")">Pagar después (volver a mis reservas)</a>
+            <a class="btn btn-outline-secondary w-100 mt-3" href="@Url.Action(User.IsInRole("Counter") ? "Atencion" : "MisReservas", "Reservas")">Pagar después</a>
         </div>
     </div>
 </div>
@@ -157,6 +183,34 @@
                 $("#NumeroTarjeta").attr("maxlength", marca.numero);
                 $("#CodigoSeguridad").attr("maxlength", marca.cvv);
             }
+        });
+
+        $("#btnPagar").on("click", function () {
+            if (!$("#formPago").valid()) {
+                return;
+            }
+
+            var marca = longitudes[$("#MarcaTarjetaCodigo").val()];
+            var numero = $("#NumeroTarjeta").val();
+            if (marca && numero.length !== marca.numero) {
+                alert("La tarjeta " + $("#MarcaTarjetaCodigo option:selected").text() + " debe tener " + marca.numero + " dígitos.");
+                return;
+            }
+
+            if (marca && $("#CodigoSeguridad").val().length !== marca.cvv) {
+                alert("El CVV de " + $("#MarcaTarjetaCodigo option:selected").text() + " tiene " + marca.cvv + " dígitos.");
+                return;
+            }
+
+            $("#modalMetodo").text($("#MetodoPagoCodigo option:selected").text());
+            $("#modalTarjeta").text($("#MarcaTarjetaCodigo option:selected").text() + " **** " + numero.slice(-4));
+            var modal = new bootstrap.Modal(document.getElementById("modalConfirmarPago"));
+            modal.show();
+        });
+
+        $("#btnConfirmarPago").on("click", function () {
+            $(this).prop("disabled", true).text("Procesando...");
+            $("#formPago").submit();
         });
     </script>
 }

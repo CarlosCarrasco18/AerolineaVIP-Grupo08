@@ -75,6 +75,18 @@ namespace Progra_03.Models
         [Display(Name = "Correo electrónico")]
         public string Email { get; set; }
 
+        [Required(ErrorMessage = "Ingrese sus nombres.")]
+        [StringLength(100, ErrorMessage = "Los nombres deben tener entre {2} y {1} caracteres.", MinimumLength = 2)]
+        [RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$", ErrorMessage = "Los nombres solo admiten letras.")]
+        [Display(Name = "Nombres")]
+        public string Nombres { get; set; }
+
+        [Required(ErrorMessage = "Ingrese sus apellidos.")]
+        [StringLength(100, ErrorMessage = "Los apellidos deben tener entre {2} y {1} caracteres.", MinimumLength = 2)]
+        [RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$", ErrorMessage = "Los apellidos solo admiten letras.")]
+        [Display(Name = "Apellidos")]
+        public string Apellidos { get; set; }
+
         [Required(ErrorMessage = "Ingrese su cédula.")]
         [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "La cédula debe tener 10 dígitos.")]
         [Display(Name = "Cédula")]

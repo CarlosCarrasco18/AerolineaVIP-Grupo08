@@ -15,7 +15,6 @@ namespace Progra_03.Controllers
     {
         private AerolineaVIPEntities db = new AerolineaVIPEntities();
 
-        // GET: Rutas
         [Authorize(Roles = "view")]
         public ActionResult Index()
         {
@@ -23,7 +22,6 @@ namespace Progra_03.Controllers
             return View(rutas);
         }
 
-        // GET: Rutas/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
@@ -38,7 +36,6 @@ namespace Progra_03.Controllers
             return View(ruta);
         }
 
-        // GET: Rutas/Create
         [Authorize(Roles = "create")]
         public ActionResult Create()
         {
@@ -46,7 +43,6 @@ namespace Progra_03.Controllers
             return View();
         }
 
-        // POST: Rutas/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "create")]
@@ -75,7 +71,6 @@ namespace Progra_03.Controllers
             return View(ruta);
         }
 
-        // GET: Rutas/Edit/5
         [Authorize(Roles = "edit")]
         public ActionResult Edit(int? id)
         {
@@ -93,7 +88,6 @@ namespace Progra_03.Controllers
             return View(ruta);
         }
 
-        // POST: Rutas/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "edit")]
@@ -122,7 +116,6 @@ namespace Progra_03.Controllers
             return View(ruta);
         }
 
-        // GET: Rutas/Delete/5
         [Authorize(Roles = "delete")]
         public ActionResult Delete(int? id)
         {
@@ -142,7 +135,6 @@ namespace Progra_03.Controllers
             return View(ruta);
         }
 
-        // POST: Rutas/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "delete")]

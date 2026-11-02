@@ -14,8 +14,8 @@
             </div>
             <div class="col-lg-6">
                 <div class="tarjeta text-dark">
-                    <h2>¿A dónde viajas?</h2>
-                    @using (Html.BeginForm("Buscar", "Home", FormMethod.Get))
+                    <h2>Encuentra tu vuelo</h2>
+                    @using (Html.BeginForm("Resultados", "Vuelos", FormMethod.Get, new { id = "formInicio" }))
                     {
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -27,13 +27,24 @@
                                 @Html.DropDownList("destino", null, "Seleccione...", new { @class = "form-select", required = "required" })
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label">Fecha de salida</label>
+                                <input type="date" id="fecha" name="fecha" class="form-control" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">Pasajeros</label>
                                 @Html.DropDownList("pasajeros", null, new { @class = "form-select" })
                             </div>
-                            <div class="col-md-6 d-grid align-items-end">
-                                <button type="submit" class="btn btn-oro py-2">Ver fechas disponibles</button>
+                            <div class="col-12">
+                                <div id="errorInicio" class="text-danger small d-none"></div>
+                            </div>
+                            <div class="col-md-6 d-grid">
+                                <button type="submit" class="btn btn-oro py-2">Buscar vuelos</button>
+                            </div>
+                            <div class="col-md-6 d-grid">
+                                <a class="btn btn-outline-secondary py-2" href="@Url.Action("Buscar", "Vuelos")">Ver calendario de vuelos</a>
                             </div>
                         </div>
+                        <p class="small text-muted mt-3 mb-0">Horarios sujetos a la programación establecida y disponibilidad real.</p>
                     }
                 </div>
             </div>
@@ -62,7 +73,7 @@
                     <p class="small text-muted mb-2">
                         @string.Join(", ", ruta.Frecuencias.Where(f => f.Activa).Select(f => f.NombreDia).Distinct())
                     </p>
-                    <a class="small dorado fw-bold text-decoration-none" href="@Url.Action("Resultados", new { origen = ruta.AeropuertoOrigenId, destino = ruta.AeropuertoDestinoId })">Ver vuelos →</a>
+                    <a class="small dorado fw-bold text-decoration-none" href="@Url.Action("Buscar", "Vuelos", new { origen = ruta.AeropuertoOrigenId, destino = ruta.AeropuertoDestinoId })">Ver vuelos →</a>
                 </div>
             </div>
         }
@@ -71,4 +82,29 @@
 
 @section Scripts {
     @Html.Partial("_FiltroDestinos", (List<Progra_03.Models.Ruta>)ViewBag.Rutas)
+    <script>
+        $("#formInicio").on("submit", function (evento) {
+            var mensaje = "";
+            var hoy = "@DateTime.Today.ToString("yyyy-MM-dd")";
+
+            if (!$("#origen").val()) {
+                mensaje = "Seleccione el origen.";
+            } else if (!$("#destino").val()) {
+                mensaje = "Seleccione el destino.";
+            } else if ($("#origen").val() === $("#destino").val()) {
+                mensaje = "El destino debe ser diferente del origen.";
+            } else if (!$("#fecha").val()) {
+                mensaje = "Indique la fecha de salida.";
+            } else if ($("#fecha").val() < hoy) {
+                mensaje = "La fecha de salida no puede ser anterior a hoy.";
+            }
+
+            if (mensaje !== "") {
+                evento.preventDefault();
+                $("#errorInicio").text(mensaje).removeClass("d-none");
+            } else {
+                $("#errorInicio").addClass("d-none");
+            }
+        });
+    </script>
 }

@@ -9,13 +9,14 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Progra_03.Models;
+using Progra_03.Services;
 
 namespace Progra_03.Controllers
 {
     [Authorize]
     public class AccountController : Controller
     {
-        private string[] rolesPublicos = { "Cliente", "Pasajero" };
+        private string[] rolesPublicos = { "Cliente" };
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -53,17 +54,17 @@ namespace Progra_03.Controllers
             }
         }
 
-        //
-        // GET: /Account/Login
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl)
+        public ActionResult Login(string returnUrl, bool expirada = false)
         {
             ViewBag.ReturnUrl = returnUrl;
+            if (expirada)
+            {
+                ViewBag.Message = "Su sesión expiró. Inicie sesión nuevamente.";
+            }
             return View();
         }
 
-        //
-        // POST: /Account/Login
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -78,8 +79,25 @@ namespace Progra_03.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                    Session["User"] = await UserManager.FindByNameAsync(model.UserName);
-                    return RedirectToLocal(returnUrl);
+                    var usuario = await UserManager.FindByNameAsync(model.UserName);
+                    Session["User"] = usuario;
+                    if (Url.IsLocalUrl(returnUrl))
+                    {
+                        return Redirect(returnUrl);
+                    }
+                    if (await UserManager.IsInRoleAsync(usuario.Id, "view"))
+                    {
+                        return RedirectToAction("Index", "Admin");
+                    }
+                    if (await UserManager.IsInRoleAsync(usuario.Id, "Counter"))
+                    {
+                        return RedirectToAction("Atencion", "Reservas");
+                    }
+                    if (await UserManager.IsInRoleAsync(usuario.Id, "Cliente") || await UserManager.IsInRoleAsync(usuario.Id, "Pasajero"))
+                    {
+                        return RedirectToAction("MisReservas", "Reservas");
+                    }
+                    return RedirectToAction("Index", "Home");
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:
@@ -91,8 +109,6 @@ namespace Progra_03.Controllers
             }
         }
 
-        //
-        // GET: /Account/VerifyCode
         [AllowAnonymous]
         public async Task<ActionResult> VerifyCode(string provider, string returnUrl, bool rememberMe)
         {
@@ -103,8 +119,6 @@ namespace Progra_03.Controllers
             return View(new VerifyCodeViewModel { Provider = provider, ReturnUrl = returnUrl, RememberMe = rememberMe });
         }
 
-        //
-        // POST: /Account/VerifyCode
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -129,8 +143,6 @@ namespace Progra_03.Controllers
             }
         }
 
-        //
-        // GET: /Account/Register
         [AllowAnonymous]
         public ActionResult Register()
         {
@@ -138,8 +150,6 @@ namespace Progra_03.Controllers
             return View();
         }
 
-        //
-        // POST: /Account/Register
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -153,7 +163,10 @@ namespace Progra_03.Controllers
             if (!Pasajero.CedulaValida(model.Cedula))
             {
                 ModelState.AddModelError("Cedula", "La cédula ingresada no es válida.");
-                ViewBag.Message = "La cédula ingresada no es válida.";
+            }
+            else if (UserManager.Users.Any(u => u.PhoneNumber == model.Cedula))
+            {
+                ModelState.AddModelError("Cedula", "Ya existe una cuenta registrada con esta cédula.");
             }
 
             if (ModelState.IsValid)
@@ -163,6 +176,11 @@ namespace Progra_03.Controllers
                 if (result.Succeeded)
                 {
                     await UserManager.AddToRoleAsync(user.Id, model.Rol);
+
+                    AerolineaVIPEntities db = new AerolineaVIPEntities();
+                    ReservaServices servicioReservas = new ReservaServices();
+                    servicioReservas.RegistrarPasajeroCuenta(db, model.Cedula, model.Nombres, model.Apellidos, model.Email);
+                    db.Dispose();
 
                     await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
                     Session["User"] = user;
@@ -176,8 +194,6 @@ namespace Progra_03.Controllers
             return View(model);
         }
 
-        //
-        // GET: /Account/ConfirmEmail
         [AllowAnonymous]
         public async Task<ActionResult> ConfirmEmail(string userId, string code)
         {
@@ -189,16 +205,12 @@ namespace Progra_03.Controllers
             return View(result.Succeeded ? "ConfirmEmail" : "Error");
         }
 
-        //
-        // GET: /Account/ForgotPassword
         [AllowAnonymous]
         public ActionResult ForgotPassword()
         {
             return View();
         }
 
-        //
-        // POST: /Account/ForgotPassword
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -209,27 +221,28 @@ namespace Progra_03.Controllers
                 return View(model);
             }
 
+            if (Session["UltimaRecuperacion"] != null && DateTime.Now < ((DateTime)Session["UltimaRecuperacion"]).AddMinutes(1))
+            {
+                ModelState.AddModelError("", "Ya se envió una solicitud recientemente. Intente más tarde.");
+                return View(model);
+            }
+
+            Session["UltimaRecuperacion"] = DateTime.Now;
             return RedirectToAction("ForgotPasswordConfirmation");
         }
 
-        //
-        // GET: /Account/ForgotPasswordConfirmation
         [AllowAnonymous]
         public ActionResult ForgotPasswordConfirmation()
         {
             return View();
         }
 
-        //
-        // GET: /Account/ResetPassword
         [AllowAnonymous]
         public ActionResult ResetPassword(string code)
         {
             return code == null ? View("Error") : View();
         }
 
-        //
-        // POST: /Account/ResetPassword
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -253,16 +266,12 @@ namespace Progra_03.Controllers
             return View();
         }
 
-        //
-        // GET: /Account/ResetPasswordConfirmation
         [AllowAnonymous]
         public ActionResult ResetPasswordConfirmation()
         {
             return View();
         }
 
-        //
-        // POST: /Account/ExternalLogin
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -271,8 +280,6 @@ namespace Progra_03.Controllers
             return new ChallengeResult(provider, Url.Action("ExternalLoginCallback", "Account", new { ReturnUrl = returnUrl }));
         }
 
-        //
-        // GET: /Account/SendCode
         [AllowAnonymous]
         public async Task<ActionResult> SendCode(string returnUrl, bool rememberMe)
         {
@@ -286,8 +293,6 @@ namespace Progra_03.Controllers
             return View(new SendCodeViewModel { Providers = factorOptions, ReturnUrl = returnUrl, RememberMe = rememberMe });
         }
 
-        //
-        // POST: /Account/SendCode
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -305,8 +310,6 @@ namespace Progra_03.Controllers
             return RedirectToAction("VerifyCode", new { Provider = model.SelectedProvider, ReturnUrl = model.ReturnUrl, RememberMe = model.RememberMe });
         }
 
-        //
-        // GET: /Account/ExternalLoginCallback
         [AllowAnonymous]
         public async Task<ActionResult> ExternalLoginCallback(string returnUrl)
         {
@@ -333,8 +336,6 @@ namespace Progra_03.Controllers
             }
         }
 
-        //
-        // POST: /Account/ExternalLoginConfirmation
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -370,8 +371,6 @@ namespace Progra_03.Controllers
             return View(model);
         }
 
-        //
-        // POST: /Account/LogOff
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult LogOff()
@@ -382,8 +381,6 @@ namespace Progra_03.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        //
-        // GET: /Account/ExternalLoginFailure
         [AllowAnonymous]
         public ActionResult ExternalLoginFailure()
         {

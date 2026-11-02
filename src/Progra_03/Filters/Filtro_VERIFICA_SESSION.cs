@@ -16,9 +16,9 @@ namespace Progra_03.Filters
             var objUser = (ApplicationUser)HttpContext.Current.Session["User"];
             if (objUser == null)
             {
-                if (filterContext.Controller is AccountController == false && filterContext.Controller is HomeController == false)
+                if (filterContext.Controller is AccountController == false && filterContext.Controller is HomeController == false && filterContext.Controller is VuelosController == false)
                 {
-                    filterContext.Result = new RedirectToRouteResult("Default", new RouteValueDictionary(new { controller = "Account", action = "Login" }));
+                    filterContext.Result = new RedirectToRouteResult("Default", new RouteValueDictionary(new { controller = "Account", action = "Login", expirada = filterContext.HttpContext.User.Identity.IsAuthenticated }));
                 }
             }
             else

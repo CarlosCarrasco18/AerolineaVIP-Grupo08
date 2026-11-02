@@ -2,12 +2,13 @@
 
 @{
     ViewBag.Title = "Mis reservas";
+    var viajes = (List<Progra_03.Models.ReservaPasajeroVuelo>)ViewBag.Viajes;
 }
 
 <div class="encabezado">
     <div class="container">
         <h1>Mis reservas</h1>
-        <p>Pantalla 13 · Reservas que usted compró.</p>
+        <p>Pantalla 13 · Reservas que usted compró y viajes que otra persona compró a su nombre.</p>
     </div>
 </div>
 
@@ -33,7 +34,8 @@
         </div>
     }
 
-    <div class="tabla">
+    <h6 class="fw-bold mb-2">Reservas que compré</h6>
+    <div class="tabla mb-4">
         <table class="table table-hover">
             <thead>
                 <tr>
@@ -65,7 +67,7 @@
                                 }
                                 @if (item.EstadoReservaCodigo == "CONFIRMADA")
                                 {
-                                    @Html.ActionLink("Check-in", "CheckIn", new { id = item.ReservaId })
+                                    @Html.ActionLink("Check-in", "Index", "CheckIn", new { id = item.ReservaId }, null)
                                     @Html.ActionLink("Comprobante", "Index", "Comprobantes", new { numero = item.CodigoReserva }, null)
                                 }
                             </span>
@@ -75,6 +77,48 @@
                 @if (Model.Count() == 0)
                 {
                     <tr><td colspan="7" class="text-muted">No tiene reservas registradas.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <h6 class="fw-bold mb-2">Mis viajes comprados por otra persona</h6>
+    <div class="tabla">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Reserva</th>
+                    <th>Pasajero</th>
+                    <th>Vuelo</th>
+                    <th>Salida</th>
+                    <th>Asiento</th>
+                    <th>Estado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in viajes)
+                {
+                    <tr>
+                        <td><b>@item.Reserva.CodigoReserva</b></td>
+                        <td>@item.Pasajero.NombreCompleto</td>
+                        <td>@item.Vuelo.CodigoVuelo · @item.Vuelo.Frecuencia.Ruta.Descripcion</td>
+                        <td>@item.Vuelo.FechaHoraSalida.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@item.CodigoAsiento</td>
+                        <td><span class="estado e-@item.Reserva.EstadoReservaCodigo">@item.Reserva.EstadoReservaCodigo</span></td>
+                        <td class="text-end">
+                            <span class="acc">
+                                @if (item.EstadoAsignacionCodigo == "CONFIRMADA")
+                                {
+                                    @Html.ActionLink("Check-in", "Index", "CheckIn", new { id = item.ReservaId }, null)
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                }
+                @if (viajes.Count == 0)
+                {
+                    <tr><td colspan="7" class="text-muted">No hay viajes comprados por otra persona con su cédula.</td></tr>
                 }
             </tbody>
         </table>

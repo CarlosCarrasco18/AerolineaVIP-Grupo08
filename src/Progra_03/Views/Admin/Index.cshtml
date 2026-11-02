@@ -10,22 +10,17 @@
 </div>
 
 <div class="container">
-    @if (!User.IsInRole("view"))
-    {
-        <div class="alert alert-info small">Su usuario tiene permisos para editar y eliminar registros. Ingrese al registro desde su enlace directo, como <b>/Vueloes/Edit/1</b>.</div>
-    }
-
     <div class="row g-3">
         <div class="col-md-6 col-lg-3">
-            <a class="tarjeta modulo" href="@Url.Action("Index", "Vueloes")">
+            <a class="tarjeta modulo" href="@Url.Action("Vuelos", "Admin")">
                 <div class="ico">V</div>
                 <h2 class="mb-1">Vuelos e itinerarios</h2>
-                <p class="small text-muted mb-2">Vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
+                <p class="small text-muted mb-2">Generar vuelos, conflictos, vuelos, frecuencias, rutas, aeropuertos, itinerarios y tramos.</p>
                 <span class="small dorado fw-bold">Entrar →</span>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
-            <a class="tarjeta modulo" href="@Url.Action("Index", "Aeronaves")">
+            <a class="tarjeta modulo" href="@Url.Action("Aeronaves", "Admin")">
                 <div class="ico">A</div>
                 <h2 class="mb-1">Aeronaves</h2>
                 <p class="small text-muted mb-2">Flota, modelos y estado operativo.</p>
@@ -33,18 +28,18 @@
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
-            <a class="tarjeta modulo" href="@Url.Action("Index", "Reservas")">
+            <a class="tarjeta modulo" href="@Url.Action("Gestion", "Admin")">
                 <div class="ico">U</div>
                 <h2 class="mb-1">Usuarios, pasajeros y reservas</h2>
-                <p class="small text-muted mb-2">Consulta de usuarios, pasajeros y reservas. Atención de counter.</p>
+                <p class="small text-muted mb-2">Búsqueda general, usuarios y roles, pasajeros y reservas.</p>
                 <span class="small dorado fw-bold">Entrar →</span>
             </a>
         </div>
         <div class="col-md-6 col-lg-3">
-            <a class="tarjeta modulo" href="@Url.Action("Index", "Reportes")">
+            <a class="tarjeta modulo" href="@Url.Action("Reportes", "Admin")">
                 <div class="ico">R</div>
                 <h2 class="mb-1">Reportes</h2>
-                <p class="small text-muted mb-2">Ocupación y ventas por fecha, ruta y aeronave.</p>
+                <p class="small text-muted mb-2">Ocupación, reservas por estado y compras con pagos simulados.</p>
                 <span class="small dorado fw-bold">Entrar →</span>
             </a>
         </div>

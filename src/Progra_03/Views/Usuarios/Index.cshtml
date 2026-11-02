@@ -7,7 +7,7 @@
 <div class="encabezado">
     <div class="container">
         <h1>Usuarios, pasajeros y reservas</h1>
-        <p>Pantalla 20 · Usuarios del sistema. Los roles se asignan por código en Global.asax.</p>
+        <p>Pantalla 20 · Usuarios del sistema. Solo el superusuario puede crear cuentas con otros perfiles y asignar roles.</p>
     </div>
 </div>
 
@@ -16,6 +16,10 @@
 
     <div class="d-flex justify-content-between align-items-center my-3">
         <span class="text-muted small">@Html.ActionLink("← Administración", "Index", "Admin") · @Model.Count() registro(s)</span>
+        @if (User.IsInRole("create"))
+        {
+            @Html.ActionLink("+ Crear usuario", "Create", null, new { @class = "btn btn-oro" })
+        }
     </div>
 
     @using (Html.BeginForm("Index", "Usuarios", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
@@ -39,6 +43,7 @@
                     <th>@Html.DisplayNameFor(model => model.Email)</th>
                     <th>@Html.DisplayNameFor(model => model.Cedula)</th>
                     <th>@Html.DisplayNameFor(model => model.Roles)</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -49,6 +54,22 @@
                         <td>@item.Email</td>
                         <td>@item.Cedula</td>
                         <td>@item.Roles</td>
+                        <td class="text-end">
+                            <span class="acc">
+                                @if (User.IsInRole("edit"))
+                                {
+                                    @Html.ActionLink("Editar", "Edit", new { id = item.Id })
+                                }
+                                @if (User.IsInRole("create"))
+                                {
+                                    @Html.ActionLink("Asignar rol", "AsignarRol", new { id = item.Id })
+                                }
+                                @if (User.IsInRole("delete"))
+                                {
+                                    @Html.ActionLink("Eliminar", "Delete", new { id = item.Id }, new { @class = "borrar" })
+                                }
+                            </span>
+                        </td>
                     </tr>
                 }
             </tbody>
