@@ -12,7 +12,7 @@
 <div class="encabezado">
     <div class="container">
         <h1>Resultados de búsqueda</h1>
-        <p>Pantalla 6 · Horarios disponibles para su búsqueda.</p>
+        <p>Horarios disponibles para su búsqueda.</p>
         @Html.Partial("_Pasos", 0)
     </div>
 </div>
@@ -89,7 +89,7 @@
                 }
                 @if (Model.Count() == 0)
                 {
-                    <tr><td colspan="8" class="text-muted">No hay vuelos directos para esta búsqueda.</td></tr>
+                    <tr><td colspan="8" class="text-muted">No hay vuelos para los criterios seleccionados.</td></tr>
                 }
             </tbody>
         </table>
@@ -130,7 +130,7 @@
                 }
                 @if (itinerarios.Count == 0)
                 {
-                    <tr><td colspan="5" class="text-muted">No hay itinerarios para esta búsqueda.</td></tr>
+                    <tr><td colspan="5" class="text-muted">No hay itinerarios para los criterios seleccionados.</td></tr>
                 }
             </tbody>
         </table>

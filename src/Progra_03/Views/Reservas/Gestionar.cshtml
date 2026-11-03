@@ -12,7 +12,7 @@
 <div class="encabezado">
     <div class="container">
         <h1>Reserva @Model.CodigoReserva</h1>
-        <p>Pantalla 14 · Detalle de la reserva y cancelación.</p>
+        <p>Detalle de la reserva y cancelación.</p>
     </div>
 </div>
 
@@ -69,7 +69,7 @@
                                             <li>La reserva y sus asientos pasan a CANCELADA y los asientos vuelven a estar disponibles.</li>
                                             @if (Model.EstadoReservaCodigo == "CONFIRMADA")
                                             {
-                                                <li>La compra pasa a ANULADA, el pago simulado a REVERSADO y el comprobante a ANULADO.</li>
+                                                <li>La compra pasa a ANULADA, el pago a REVERSADO y el comprobante a ANULADO.</li>
                                             }
                                             <li>No se puede cancelar si algún vuelo ya salió o si un pasajero hizo el check-in.</li>
                                         </ul>

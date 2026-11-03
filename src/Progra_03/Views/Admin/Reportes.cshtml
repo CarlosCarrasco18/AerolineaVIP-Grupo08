@@ -9,7 +9,7 @@
 <div class="encabezado">
     <div class="container">
         <h1>Consultas y reportes</h1>
-        <p>Pantalla 21 · Ocupación por vuelo, reservas por estado y compras con pagos simulados.</p>
+        <p>Ocupación por vuelo, reservas por estado y compras con sus pagos.</p>
     </div>
 </div>
 
@@ -26,7 +26,7 @@
                 <select name="consulta" class="form-select">
                     <option value="ocupacion" @(consulta == "ocupacion" ? "selected" : "")>Ocupación por vuelo</option>
                     <option value="reservas" @(consulta == "reservas" ? "selected" : "")>Reservas por estado</option>
-                    <option value="compras" @(consulta == "compras" ? "selected" : "")>Compras y pagos simulados</option>
+                    <option value="compras" @(consulta == "compras" ? "selected" : "")>Compras y pagos</option>
                 </select>
             </div>
             <div class="col-md-2">
@@ -162,7 +162,7 @@
                         <th>Reserva</th>
                         <th>Importe</th>
                         <th>Compra</th>
-                        <th>Pagos simulados</th>
+                        <th>Pagos</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -183,7 +183,7 @@
                 </tbody>
             </table>
         </div>
-        <p class="small text-muted">Total pagado: suma de las compras en estado PAGADA. Los pagos son simulados con fines académicos.</p>
+        <p class="small text-muted">Total pagado: suma de las compras en estado PAGADA.</p>
     }
 </div>
 
