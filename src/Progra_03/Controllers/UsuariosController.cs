@@ -15,7 +15,7 @@ namespace Progra_03.Controllers
     public class UsuariosController : Controller
     {
         private string[] roles = { "view", "create", "edit", "delete", "Cliente", "Pasajero", "Counter" };
-        private string[] perfiles = { "Administrador", "Counter", "Cliente" };
+        private string[] perfiles = { "Administrador", "Counter", "Cliente", "Pasajero" };
 
         [Authorize(Roles = "view")]
         public ActionResult Index(string buscar)
@@ -344,6 +344,11 @@ namespace Progra_03.Controllers
             if (perfil == "Counter")
             {
                 return new string[] { "Counter" };
+            }
+
+            if (perfil == "Pasajero")
+            {
+                return new string[] { "Pasajero" };
             }
 
             return new string[] { "Cliente" };
