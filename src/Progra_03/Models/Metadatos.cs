@@ -235,6 +235,7 @@ namespace Progra_03.Models
         public DateTime? FechaNacimiento { get; set; }
 
         [EmailAddress(ErrorMessage = "Ingrese un correo electrónico válido.")]
+        [RegularExpression(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", ErrorMessage = "Ingrese un correo válido, por ejemplo nombre@gmail.com.")]
         [StringLength(256)]
         [Display(Name = "Correo electrónico")]
         public string Correo { get; set; }

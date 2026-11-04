@@ -112,6 +112,10 @@
                                 @Html.LabelFor(m => m.ConfirmPassword, new { @class = "form-label" })
                                 @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
                                 @Html.ValidationMessageFor(m => m.ConfirmPassword, "Las contraseñas deben coincidir", new { @class = "text-info" })
+                                <div class="form-check small mt-1">
+                                    <input class="form-check-input" type="checkbox" id="mostrarClave" />
+                                    <label class="form-check-label" for="mostrarClave">Mostrar contraseña</label>
+                                </div>
                             </div>
                         }
                         catch (Exception ex)
@@ -148,6 +152,10 @@
     @Html.Partial("_ScriptsValidacion")
     @Html.Partial("_ValidarCedula")
     <script>
+        $("#mostrarClave").on("change", function () {
+            $("#Password, #ConfirmPassword").attr("type", this.checked ? "text" : "password");
+        });
+
         $("#Cedula").on("input", function () {
             this.value = this.value.replace(/\D/g, "").slice(0, 10);
         });
