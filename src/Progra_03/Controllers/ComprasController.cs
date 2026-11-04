@@ -133,7 +133,7 @@ namespace Progra_03.Controllers
             {
                 compra.EstadoCompraCodigo = "PENDIENTE";
                 pago.EstadoPagoCodigo = "RECHAZADO";
-                pago.MensajeResultado = "Pago rechazado por el emisor (simulación: tarjeta terminada en 0000).";
+                pago.MensajeResultado = "Pago rechazado por el emisor. Verifique los datos o use otra tarjeta.";
 
                 try
                 {

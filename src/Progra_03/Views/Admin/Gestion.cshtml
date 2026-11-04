@@ -9,11 +9,12 @@
 <div class="encabezado">
     <div class="container">
         <h1>Usuarios, pasajeros y reservas</h1>
-        <p>Pantalla 20 · Búsqueda general por usuario, correo, documento, nombre o código de reserva.</p>
+        <p>Búsqueda general por usuario, correo, documento, nombre o código de reserva.</p>
     </div>
 </div>
 
 <div class="container">
+    <div class="mb-3 small">@Html.ActionLink("← Administración", "Index", "Admin")</div>
     @Html.Partial("_PestanasUsuarios", "Gestion")
 
     @using (Html.BeginForm("Gestion", "Admin", FormMethod.Get, new { @class = "tarjeta my-3 py-3" }))

@@ -8,11 +8,12 @@
 <div class="encabezado">
     <div class="container">
         <h1>Mis reservas</h1>
-        <p>Pantalla 13 · Reservas que usted compró y viajes que otra persona compró a su nombre.</p>
+        <p>Reservas que usted compró y viajes que otra persona compró a su nombre.</p>
     </div>
 </div>
 
 <div class="container">
+    <div class="mb-3 small">@Html.ActionLink("← Volver al inicio", "Index", "Home")</div>
     @using (Html.BeginForm("MisReservas", "Reservas", FormMethod.Get, new { @class = "tarjeta mb-3 py-3" }))
     {
         <div class="row g-2 align-items-end">

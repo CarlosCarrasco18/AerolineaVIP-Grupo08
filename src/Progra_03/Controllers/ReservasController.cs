@@ -153,6 +153,7 @@ namespace Progra_03.Controllers
             }
 
             List<int> vueloIds = seleccion.VueloIds;
+            List<DateTime> fechasVuelos = db.Vueloes.Where(v => vueloIds.Contains(v.VueloId)).Select(v => v.FechaOperacion).ToList();
             List<string> documentos = new List<string>();
             for (int i = 0; i < pasajeros.Count; i++)
             {
@@ -193,9 +194,14 @@ namespace Progra_03.Controllers
                     {
                         int pasajeroId = registrado.PasajeroId;
                         bool yaViaja = db.ReservaPasajeroVueloes.Any(a => vueloIds.Contains(a.VueloId) && a.PasajeroId == pasajeroId && (a.EstadoAsignacionCodigo == "PENDIENTE" || a.EstadoAsignacionCodigo == "CONFIRMADA"));
+                        bool otroVueloMismoDia = db.ReservaPasajeroVueloes.Any(a => a.PasajeroId == pasajeroId && !vueloIds.Contains(a.VueloId) && fechasVuelos.Contains(a.Vuelo.FechaOperacion) && (a.EstadoAsignacionCodigo == "PENDIENTE" || a.EstadoAsignacionCodigo == "CONFIRMADA"));
                         if (yaViaja)
                         {
                             ModelState.AddModelError("[" + i + "].NumeroDocumento", "Este pasajero ya tiene un asiento en este vuelo.");
+                        }
+                        else if (otroVueloMismoDia)
+                        {
+                            ModelState.AddModelError("[" + i + "].NumeroDocumento", "Este pasajero ya tiene otro vuelo reservado ese mismo día.");
                         }
 
                         registrado.Nombres = pasajeros[i].Nombres;
@@ -714,7 +720,7 @@ namespace Progra_03.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             Reserva reserva = db.Reservas.Find(id);
-            if (reserva == null || !PuedeVer(reserva))
+            if (reserva == null || !PuedeGestionar(reserva))
             {
                 return HttpNotFound();
             }
@@ -933,22 +939,6 @@ namespace Progra_03.Controllers
             ViewBag.PasajeroId = asignaciones[0].PasajeroId;
         }
 
-        private bool PuedeVer(Reserva reserva)
-        {
-            if (PuedeGestionar(reserva))
-            {
-                return true;
-            }
-
-            string cedula = CedulaUsuario();
-            if (cedula != "")
-            {
-                return reserva.ReservaPasajeroVueloes.Any(a => a.Pasajero.NumeroDocumento == cedula);
-            }
-
-            return false;
-        }
-
         private bool PuedeGestionar(Reserva reserva)
         {
             if (User.IsInRole("view") || User.IsInRole("Counter"))
@@ -967,17 +957,6 @@ namespace Progra_03.Controllers
             }
 
             return reserva.UsuarioId == User.Identity.GetUserId();
-        }
-
-        private string CedulaUsuario()
-        {
-            var usuario = (ApplicationUser)Session["User"];
-            if (usuario != null && usuario.PhoneNumber != null)
-            {
-                return usuario.PhoneNumber;
-            }
-
-            return "";
         }
 
         protected override void Dispose(bool disposing)

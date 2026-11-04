@@ -1,90 +1,69 @@
-# Sistema web de compra y reserva de pasajes – Aerolínea VIP
-Primera Entrega · Grupo 08
+# Aerolínea VIP · Grupo 08
 
-## Integrantes
-- Carlos Andres Carrasco Novoa
-- Joselin Liseth Villegas Chicaiza
+Sistema web monolítico para la compra, reserva y administración de pasajes de una aerolínea VIP con tres aeronaves Embraer Phenom 300E de 7 asientos.
+
+**Integrantes:** Carlos Andrés Carrasco Novoa · Joselin Liseth Villegas Chicaiza
+**Asignatura:** Desarrollo Web para Integración de Tecnologías · ESPE
 
 ## Tecnologías
-ASP.NET Framework 4.8.1 · MVC · Razor · Bootstrap 5 · jQuery · ASP.NET Identity · Entity Framework 6 (Database First) · SQL Server
 
-## Estructura del repositorio
+- ASP.NET Framework 4.8.1 con MVC y vistas Razor
+- Bootstrap 5 y jQuery (validaciones del cliente)
+- ASP.NET Identity (usuarios, roles e inicio de sesión)
+- Entity Framework 6 (Database First)
+- SQL Server
+
+## Cómo ejecutar el proyecto
+
+1. **Base de datos.** En SQL Server ejecute, en este orden:
+   - `BaseDatos/Script_BD_AerolineaVIP_Unificado.sql`: crea las bases `AerolineaVIP` y `AerolineaVIP_Identity` con los datos de ejemplo.
+   - `BaseDatos/Datos_Vuelos_Proximos_Dias.sql`: genera vuelos para los próximos 14 días desde la fecha en que se ejecuta.
+2. **Conexión.** `Web.config` usa `Integrated Security=True` (autenticación de Windows) con el servidor local. Si su instancia de SQL Server tiene otro nombre, cambie `Data Source` en las dos cadenas de conexión.
+3. **Abrir y compilar.** Clone el repositorio en una ruta corta (por ejemplo `C:\G8\`), abra `Progra_03.slnx` en Visual Studio, restaure los paquetes NuGet (clic derecho en la solución → *Restaurar paquetes NuGet*) y compile.
+4. **Ejecutar** con F5. Al iniciar, `Global.asax.cs` crea por código los roles y los usuarios de prueba si todavía no existen.
+5. Para tener vuelos en fechas más lejanas, ingrese como **superusuario** → Administración → Vuelos → *Generar vuelos*.
+
+## Usuarios de prueba
+
+| Usuario | Contraseña | Roles | Qué puede hacer |
+|---|---|---|---|
+| `superusuario` | `Super2026*` | view, create, edit, delete | Toda la administración; generar vuelos; crear usuarios y asignar perfiles |
+| `administrador` | `Admin2026*` | view, edit, delete | Ver, editar y eliminar en la administración; reportes; cancelar reservas y cambiar asientos. No crea registros ni usuarios |
+| `counter.uio` | `Counter2026*` | Counter | Atención al cliente: buscar un cliente por usuario o cédula y comprar, pagar, cancelar, cambiar asiento y hacer check-in a su nombre |
+| `cliente` | `Cliente2026*` | Cliente | Buscar vuelos, reservar, pagar, cancelar sus reservas, check-in y comprobantes |
+| `pasajero` | `Pasajero2026*` | Pasajero | Ver los viajes donde aparece su cédula y hacer el check-in de su asiento |
+
+En el registro público se puede elegir **Cliente** (compra pasajes) o **Pasajero** (ve los viajes que otra persona le compró por su cédula y hace su check-in, pero no puede comprar). Los perfiles Administrador y Counter solo los crea el superusuario en Administración → Usuarios.
+
+## Flujo principal
+
+1. **Buscar vuelo.** En *Inicio* o *Vuelos* elija origen, destino, fecha y número de pasajeros (1 a 7). El calendario de *Vuelos* solo habilita los días con vuelos.
+   - Quito – Guayaquil: martes, jueves y sábado.
+   - Quito – Manta: lunes, miércoles y viernes.
+   - Quito – Galápagos: domingo, con escala en Guayaquil.
+2. **Resultados y disponibilidad.** Elija un vuelo o un itinerario y revise el mapa de asientos: verde disponible, morado reservado, rojo ocupado.
+3. **Seleccionar asientos.** Pide iniciar sesión como cliente. Elija un asiento por pasajero.
+4. **Datos de los pasajeros.** Documento (cédula ecuatoriana o pasaporte), nombres, apellidos y datos de contacto.
+5. **Confirmar la reserva.** Acepte las condiciones y elija *Confirmar reserva (pagar después)* o *Confirmar y pagar*. La reserva queda PENDIENTE durante 60 minutos; si no se paga, expira y los asientos se liberan.
+6. **Pagar.** Complete los datos de la tarjeta y confirme en la ventana de confirmación. Con el pago aprobado la reserva pasa a CONFIRMADA y se emite la factura.
+7. **Check-in.** Disponible desde 48 horas antes de la salida hasta la hora del vuelo, con el código de reserva (RV + 8 dígitos) y el documento del pasajero. Al terminar se muestra la tarjeta de embarque.
+8. **Comprobantes.** Consulta e impresión de las facturas.
+
+## Datos para probar
+
+- **Pago:** los pagos son simulados, sin cobros reales (alcance académico del proyecto). Cualquier tarjeta con el formato correcto se aprueba; una tarjeta terminada en `0000` se rechaza para probar ese caso.
+  - Visa aprobada: `4111111111111111`, vencimiento `12/28`, CVV `123`
+  - Visa rechazada: `4111111111110000`, vencimiento `12/28`, CVV `123`
+- **Cédulas válidas para pasajeros nuevos:** `1723450001`, `0912340007`, `1309870002`
+- **Vuelos especiales de los datos de ejemplo:** el sábado 07/11/2026 a las 19:00 (Quito → Guayaquil) no tiene aeronave asignada y no se vende; el viernes 06/11/2026 a las 19:00 (Quito → Manta) está cancelado.
+
+## Estructura del proyecto
+
 | Carpeta | Contenido |
 |---|---|
-| `src/Progra_03/` | Proyecto ASP.NET MVC (solución `Progra_03.slnx`) |
-| `database/` | Scripts SQL de la base de datos |
-| `docs/` | Documentación de la entrega (PDF, wireframes aplicados y políticas) |
-
----
-
-## 1. Cómo ejecutar el proyecto
-
-1. Abrir **SQL Server Management Studio** y ejecutar completo (F5) `database/Script_BD_AerolineaVIP_Unificado.sql`.
-   Crea las dos bases de datos: `AerolineaVIP` (dominio) y `AerolineaVIP_Identity` (usuarios y roles).
-2. *(Opcional)* Ejecutar `database/Datos_Vuelos_Proximos_Dias.sql` para crear vuelos en los próximos 14 días.
-   Sirve para probar el **check-in**, que solo se habilita 48 horas antes del vuelo.
-3. Revisar en `src/Progra_03/Web.config` las dos cadenas de conexión:
-   - `DefaultConnection` → `AerolineaVIP_Identity`
-   - `AerolineaVIPEntities` → `AerolineaVIP`
-
-   Ambas usan el servidor local con el usuario `sa` y la contraseña `123`.
-4. Abrir `src/Progra_03/Progra_03.slnx` en Visual Studio.
-5. Menú **Compilar → Recompilar solución** (descarga los paquetes NuGet) y ejecutar con **F5**.
-6. Al iniciar, `Global.asax.cs` crea automáticamente los roles y los usuarios de la tabla siguiente.
-
-> Si al ejecutar por primera vez aparece *"No se puede encontrar una parte de la ruta de acceso… bin\roslyn\csc.exe"*, usar **Compilar → Recompilar solución** y volver a ejecutar.
-
----
-
-## 2. Usuarios creados en `Global.asax.cs`
-
-| Usuario | Contraseña | Rol(es) | Qué puede hacer |
-|---|---|---|---|
-| `superusuario` | `Super2026*` | view, create, edit, delete | Acceso completo a **Administración**: ver, crear, editar y eliminar en todos los módulos |
-| `administrador` | `Admin2026*` | edit, delete | Editar y eliminar registros de administración (no tiene permiso de ver listados ni de crear) |
-| `counter.uio` | `Counter2026*` | view | Consultar listados, reservas, usuarios y reportes; asistir el check-in |
-| `cliente` | `Cliente2026*` | Cliente | Buscar vuelos, reservar, pagar, ver **Mis reservas** y **Comprobantes**, cancelar |
-| `pasajero` | `Pasajero2026*` | Pasajero | Ver **Mis viajes** (documento 0910000008) y realizar el check-in |
-
-**Registro público:** en *Registrarse* solo se puede elegir el tipo de cuenta **Cliente** o **Pasajero**. Los roles de administración no se ofrecen y el servidor rechaza cualquier otro valor.
-
----
-
-## 3. Recorrido sugerido para probar
-
-**Compra de un pasaje (usuario `cliente`)**
-1. *Vuelos* → elegir origen, destino y fecha → **Buscar**.
-2. **Ver disponibilidad** → elegir asientos en el mapa:
-   🟢 verde = disponible · 🔴 rojo = ocupado · 🟣 morado = reservado.
-3. Completar los datos de cada pasajero (cédula ecuatoriana válida o pasaporte).
-4. **Confirmar reserva**. La reserva queda *PENDIENTE* durante 60 minutos.
-5. **Pagar** con datos de prueba:
-
-   | Marca | Número | CVV | Vencimiento |
-   |---|---|---|---|
-   | Visa | `4111111111111111` | `123` | cualquier mes futuro, p. ej. `12/28` |
-   | Mastercard | `5555555555554444` | `123` | `12/28` |
-   | American Express | `378282246310005` | `1234` | `12/28` |
-
-6. Se emite el comprobante y la reserva pasa a *CONFIRMADA*.
-
-**Check-in (usuario `pasajero` o `cliente`)**
-*Mis reservas / Mis viajes* → reserva confirmada → **Check-in** (habilitado desde 48 horas antes del vuelo).
-
-**Administración (usuario `superusuario`)**
-Menú *Administración* → Vuelos e itinerarios · Aeronaves · Usuarios, pasajeros y reservas · Reportes.
-
----
-
-## 4. Scripts de apoyo (`database/`)
-
-| Archivo | Uso |
-|---|---|
-| `Script_BD_AerolineaVIP_Unificado.sql` | Crea las dos bases de datos con sus tablas y datos iniciales |
-| `Datos_Vuelos_Proximos_Dias.sql` | Agrega vuelos para los próximos días (para probar check-in) |
-| `Reiniciar_Usuarios_Identity.sql` | Borra los usuarios de Identity; al volver a ejecutar la aplicación se crean de nuevo. Detener la aplicación antes de usarlo |
-
----
-
-## Estado
-Versión `v1.0-primera-entrega` · 28/10/2026 · Grupo 08
+| `Controllers/` | Un controlador por módulo y los CRUD generados con scaffolding |
+| `Models/` | Modelo de Entity Framework, métodos de cálculo (`*_Calculos.cs`), validaciones (`Metadatos.cs`) y ViewModels |
+| `Services/` | Lógica compartida de reservas y generación de vuelos |
+| `Filters/` | Filtro de sesión |
+| `Views/` | Vistas Razor agrupadas por controlador |
+| `BaseDatos/` | Scripts de SQL Server |

@@ -114,6 +114,10 @@ namespace Progra_03.Controllers
                 {
                     errores.Add(nombre + ": ya tiene el check-in realizado.");
                 }
+                else if (asignacion.Pasajero.NumeroDocumento == null || asignacion.Pasajero.NumeroDocumento.Trim() == "")
+                {
+                    errores.Add(nombre + ": el pasajero no tiene número de documento registrado; no se puede hacer el check-in.");
+                }
                 else
                 {
                     CheckIn checkIn = new CheckIn();

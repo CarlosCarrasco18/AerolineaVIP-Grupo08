@@ -16,7 +16,7 @@ namespace Progra_03.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        private string[] rolesPublicos = { "Cliente" };
+        private string[] rolesPublicos = { "Cliente", "Pasajero" };
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -221,13 +221,15 @@ namespace Progra_03.Controllers
                 return View(model);
             }
 
-            if (Session["UltimaRecuperacion"] != null && DateTime.Now < ((DateTime)Session["UltimaRecuperacion"]).AddMinutes(1))
+            string correo = model.Email.Trim().ToLower();
+            if (Session["UltimaRecuperacion"] != null && (string)Session["CorreoRecuperacion"] == correo && DateTime.Now < ((DateTime)Session["UltimaRecuperacion"]).AddMinutes(1))
             {
-                ModelState.AddModelError("", "Ya se envió una solicitud recientemente. Intente más tarde.");
+                ModelState.AddModelError("", "Ya se envió una solicitud para este correo recientemente. Intente más tarde.");
                 return View(model);
             }
 
             Session["UltimaRecuperacion"] = DateTime.Now;
+            Session["CorreoRecuperacion"] = correo;
             return RedirectToAction("ForgotPasswordConfirmation");
         }
 

@@ -9,11 +9,12 @@
 <div class="encabezado">
     <div class="container">
         <h1>Vuelos e itinerarios</h1>
-        <p>Pantalla 18 · Generación de vuelos desde las frecuencias aprobadas, conflictos de aeronave y programación por fecha.</p>
+        <p>Generación de vuelos desde las frecuencias aprobadas, conflictos de aeronave y programación por fecha.</p>
     </div>
 </div>
 
 <div class="container">
+    <div class="mb-3 small">@Html.ActionLink("← Administración", "Index", "Admin")</div>
     @Html.Partial("_PestanasVuelos", "Programacion")
 
     @Html.Partial("_Mensaje")

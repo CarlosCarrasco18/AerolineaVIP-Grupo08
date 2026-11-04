@@ -9,14 +9,13 @@
 <div class="encabezado">
     <div class="container">
         <h1>Pago</h1>
-        <p>Pantalla 11 · Complete los datos de la tarjeta y confirme el pago en la ventana de confirmación.</p>
+        <p>Complete los datos de la tarjeta y confirme el pago en la ventana de confirmación.</p>
         @Html.Partial("_Pasos", 5)
     </div>
 </div>
 
 <div class="container">
     @Html.Partial("_Mensaje")
-    <div class="alert alert-warning small"><b>Simulación académica:</b> no se realizan cobros reales. Una tarjeta terminada en 0000 simula un pago rechazado.</div>
 
     <div class="row g-4">
         <div class="col-lg-7">
@@ -86,7 +85,7 @@
                                 <div class="col-md-6">
                                     @Html.LabelFor(model => model.Vencimiento, htmlAttributes: new { @class = "form-label" })
                                     @Html.EditorFor(model => model.Vencimiento, new { htmlAttributes = new { @class = "form-control", inputmode = "numeric", maxlength = "5", placeholder = "MM/AA" } })
-                                    @Html.ValidationMessageFor(model => model.Vencimiento, "Ingrese una fecha de vencimiento válida (MM/AA)", new { @class = "text-info" })
+                                    @Html.ValidationMessageFor(model => model.Vencimiento, "", new { @class = "text-danger small" })
                                 </div>
                             }
                             catch (Exception ex)
@@ -127,7 +126,7 @@
                                 <div class="d-flex justify-content-between"><span>Tarjeta</span><b id="modalTarjeta"></b></div>
                                 <hr />
                                 <div class="d-flex justify-content-between"><span>Monto total</span><b class="fs-5">USD @reserva.CalcularTotal().ToString("N2")</b></div>
-                                <div class="text-muted mt-2">Estado: pago simulado sin procesar. Si cancela, no se registra ningún pago.</div>
+                                <div class="text-muted mt-2">Si cancela, no se registra ningún pago.</div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>

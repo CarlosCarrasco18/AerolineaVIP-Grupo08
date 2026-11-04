@@ -8,11 +8,12 @@
 <div class="encabezado">
     <div class="container">
         <h1>Aeronaves</h1>
-        <p>Pantalla 19 · Estado de la flota, capacidad y asignaciones de los próximos 7 días.</p>
+        <p>Estado de la flota, capacidad y asignaciones de los próximos 7 días.</p>
     </div>
 </div>
 
 <div class="container">
+    <div class="mb-3 small">@Html.ActionLink("← Administración", "Index", "Admin")</div>
     @Html.Partial("_PestanasAeronaves", "Flota")
 
     @if ((int)ViewBag.SinAeronave > 0)

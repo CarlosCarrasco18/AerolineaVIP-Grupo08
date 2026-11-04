@@ -5,11 +5,12 @@
 <div class="encabezado">
     <div class="container">
         <h1>Administración</h1>
-        <p>Pantalla 17 · Accesos a los módulos según sus permisos.</p>
+        <p>Accesos a los módulos según sus permisos.</p>
     </div>
 </div>
 
 <div class="container">
+    <div class="mb-3 small">@Html.ActionLink("← Volver al inicio", "Index", "Home")</div>
     <div class="row g-3">
         <div class="col-md-6 col-lg-3">
             <a class="tarjeta modulo" href="@Url.Action("Vuelos", "Admin")">
@@ -39,7 +40,7 @@
             <a class="tarjeta modulo" href="@Url.Action("Reportes", "Admin")">
                 <div class="ico">R</div>
                 <h2 class="mb-1">Reportes</h2>
-                <p class="small text-muted mb-2">Ocupación, reservas por estado y compras con pagos simulados.</p>
+                <p class="small text-muted mb-2">Ocupación, reservas por estado y compras con sus pagos.</p>
                 <span class="small dorado fw-bold">Entrar →</span>
             </a>
         </div>
